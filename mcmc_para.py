@@ -90,7 +90,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
 
 def download_data(filename: str) -> None:
     from eispac.download import download_hdf5_data
-    download_hdf5_data(filename, localtop='SO_EIS_data', overwrite=False)
+    download_hdf5_data(filename, local_top='SO_EIS_data', overwrite=False)
 
 def process_data(filename: str) -> None:
     # Create an ashmcmc object with the specified filename
