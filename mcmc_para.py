@@ -39,7 +39,7 @@ def mcmc_process(mcmc_lines: list[EmissionLine], temp_bins: TempBins) -> np.ndar
 def check_dem_exists(filename: str) -> bool:
     # Check if the DEM file exists
     from os.path import exists
-    return exists()    
+    return exists(filename)    
 
 def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray, ashmcmc]) -> None:
     # Process a single pixel with the given arguments
