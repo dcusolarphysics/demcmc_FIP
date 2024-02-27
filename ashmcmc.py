@@ -98,8 +98,8 @@ class ashmcmc:
         from scipy.io import readsav
         import astropy.units as u
         # Find matching file based on density
-        emis_file = readsav(find_matching_file(ldens, directory=abund_file))
-        print(find_matching_file(ldens, directory=abund_file))
+        emis_file = readsav(find_matching_file(ldens, abund_file=abund_file))
+        print(find_matching_file(ldens, abund_file=abund_file))
         logt = 10**emis_file['logt_interpolated']*u.K
         emis = emis_file['emissivity_combined']
         linenames = emis_file['linenames'].astype(str)
