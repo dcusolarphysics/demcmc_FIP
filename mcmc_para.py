@@ -115,7 +115,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
         xpix_loc = search(r'dem_(\d+)\.npz$', dem_file).group(1)
         dem_combined[:,int(xpix_loc), :] = np.load(dem_file)['dem_results'] 
         chi2_combined[:,int(xpix_loc)] = np.load(dem_file)['chi2'] 
-        lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file)['lines_used']])
+        lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file, allow_pickle=True)['lines_used']])
     return dem_combined, chi2_combined, lines_used, logt
 
 def process_data(filename: str) -> None:
