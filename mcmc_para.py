@@ -29,7 +29,7 @@ def mcmc_process(mcmc_lines: list[EmissionLine], temp_bins: TempBins) -> np.ndar
     # Perform MCMC process for the given MCMC lines and temperature bins
     dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=300, progress=False, dem_guess=None)
     dem_init = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())], axis=0)
-    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=3000, progress=False,
+    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=2000, progress=False,
                                     dem_guess=dem_init)
     dem_median = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())],
                             axis=0)
@@ -134,7 +134,7 @@ def process_data(filename: str) -> None:
 
     # Determine the operating system type (Linux or macOS)
     # Set the number of processes based on the operating system
-    if platform.system() == "Linux": process_num = 60
+    if platform.system() == "Linux": process_num = 60 # above 64 seems to break the MSSL machine
     elif platform.system() == "Darwin": process_num = 10
     else: process_num = 10 
 
