@@ -41,6 +41,7 @@ def check_dem_exists(filename: str) -> bool:
     from os.path import exists
     return exists(filename)    
 
+
 def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray, ashmcmc]) -> None:
     from pathlib import Path
     # Process a single pixel with the given arguments
@@ -83,7 +84,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
                     )
                     mcmc_lines.append(emissionLine)
 
-            dem_median = mcmc_process(mcmc_lines, temp_bins)
+            dem_median = mcmc_process(mcmc_lines, temp_bins) # Run 2 MCMC processes and return the median DEM
             dem_results.append(dem_median)
             chi2 = calc_chi2(mcmc_lines, dem_median, temp_bins)
             chi2_results.append(chi2)
@@ -105,13 +106,17 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
 
     dem_files = sorted(glob(f'{dir}/dem_columns/dem*.npz'))
     ref = np.load(dem_files[0])['dem_results'].shape
+    logt = np.load(dem_files[0])['logt']
     dem_combined = np.zeros((ydim,xdim,ref[1]))
+    chi2_combined = np.zeros((ydim,xdim))
+    lines_used = np.zeros((ydim,xdim))
 
     for dem_file in dem_files:
         xpix_loc = search(r'dem_(\d+)\.npz$', dem_file).group(1)
         dem_combined[:,int(xpix_loc), :] = np.load(dem_file)['dem_results'] 
-
-    return dem_combined
+        chi2_combined[:,int(xpix_loc)] = np.load(dem_file)['chi2'] 
+        lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file)['lines_used']])
+    return dem_combined, chi2_combined, lines_used, logt
 
 def process_data(filename: str) -> None:
     # Create an ashmcmc object with the specified filename
@@ -138,10 +143,35 @@ def process_data(filename: str) -> None:
 
     # Combine the DEM files into a single array
     print('------------------------------Combining DEM files------------------------------')
-    dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
-    np.save(f'{a.outdir}/{a.outdir}_dem_combined.npy', dem_combined)
+    dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
+    np.savez(f'{a.outdir}/{a.outdir}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, lines_used=lines_used, logt=logt)
 
-# def calc_composition():
+# def calc_composition(ash_object, dem_combined):
+#     line_databases = {
+#         "si_10_258.37" :["si_10_258_375.1c.template.h5",0],
+#         "s_10_264.23" : ["s__10_264_233.1c.template.h5",0],
+#         # Add more line pairs as needed
+#     }
+
+#     intensities = []
+#     intensity_errors = []
+
+#     for line in line_databases:
+#         Int, Int_error = ash_object.ash.get_intensity(line, outdir=ash_object.outdir, mcmc=True)
+#         intensities.append(Int)
+#         intensity_errors.append(Int_error)
+
+#     emissionLine = EmissionLine(
+#         mcmc_emis,
+#         intensity_obs=mcmc_intensity,
+#         sigma_intensity_obs=mcmc_int_error,
+#         name=line
+#     )
+
+
+#     temp_bins = TempBins(logt_interp)
+
+#     int_pred = np.array([line._I_pred(temp_bins, dem_result) for line in mcmc_lines])
 
 if __name__ == "__main__":
     filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
