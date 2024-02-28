@@ -41,6 +41,29 @@ def check_dem_exists(filename: str) -> bool:
     from os.path import exists
     return exists(filename)    
 
+# def cal_comp():
+#     # Calculate the composition of the plasma
+#     sis = ['si_10_258.37', 'si_10_258.37']
+#     fear = ['fe_14_264.79', 'ar_11_188.81']
+#     for ind, line in enumerate(Lines):
+#         if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
+#             mcmc_emis = emis_sorted[ind, :]
+#             mcmc_emis = ContFuncDiscrete(logt_interp, interp_emis_temp(emis_sorted[ind, :])[loc] * u.cm ** 5 / u.K,
+#                                         name=line)
+#             mcmc_intensity = Intensity[ypix, xpix, ind]
+#             mcmc_int_error = max(Int_error[ypix, xpix, ind], 0.25 * mcmc_intensity)
+#             emissionLine = EmissionLine(
+#                 mcmc_emis,
+#                 intensity_obs=mcmc_intensity,
+#                 sigma_intensity_obs=mcmc_int_error,
+#                 name=line
+#             )
+#             mcmc_lines.append(emissionLine)
+
+#     emissionLine._I_pred(temp_bins, dem_median)
+
+    
+#     int_pred = np.array([line._I_pred(temp_bins, dem_result) for line in mcmc_lines])
 
 def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray, ashmcmc]) -> None:
     from pathlib import Path
@@ -63,16 +86,15 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
 
             logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix])
             logt_interp = interp_emis_temp(logt.value)
-            loc = np.where((np.log10(logt_interp) >= 4) & (np.log10(logt_interp) <= 8))
-            logt_interp = logt_interp[loc] * u.K
+            temp_bins = TempBins(logt_interp * u.K)
+            # loc = np.where((np.log10(logt_interp) >= 4) & (np.log10(logt_interp) <= 8))
             emis_sorted = a.emis_filter(emis, linenames, Lines)
-            temp_bins = TempBins(logt_interp)
             mcmc_lines = []
 
             for ind, line in enumerate(Lines):
                 if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
                     mcmc_emis = emis_sorted[ind, :]
-                    mcmc_emis = ContFuncDiscrete(logt_interp, interp_emis_temp(emis_sorted[ind, :])[loc] * u.cm ** 5 / u.K,
+                    mcmc_emis = ContFuncDiscrete(logt_interp, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
                                                 name=line)
                     mcmc_intensity = Intensity[ypix, xpix, ind]
                     mcmc_int_error = max(Int_error[ypix, xpix, ind], 0.25 * mcmc_intensity)
@@ -85,11 +107,14 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
                     mcmc_lines.append(emissionLine)
 
             dem_median = mcmc_process(mcmc_lines, temp_bins) # Run 2 MCMC processes and return the median DEM
-            dem_results.append(dem_median)
             chi2 = calc_chi2(mcmc_lines, dem_median, temp_bins)
+            dem_results.append(dem_median)
             chi2_results.append(chi2)
             ycoords_out.append(ypix)
             linenames_list.append(mcmc_lines)
+
+
+
         dem_results = np.array(dem_results)
         chi2_results = np.array(chi2_results)
         linenames_list = np.array(linenames_list, dtype=object)
@@ -127,6 +152,10 @@ def process_data(filename: str) -> None:
     # Retrieve necessary data from ashmcmc object
     Lines, Intensity, Int_error = a.fit_data(plot=False)
     ldens = a.read_density()
+    
+    for ypix in tqdm(range(Intensity.shape[0])):
+
+        logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix])
 
     # Generate a list of arguments for process_pixel function
     args_list = [(xpix, Intensity, Int_error, Lines, ldens, a) for xpix in range(Intensity.shape[1])]
@@ -145,34 +174,69 @@ def process_data(filename: str) -> None:
     print('------------------------------Combining DEM files------------------------------')
     dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     np.savez(f'{a.outdir}/{a.outdir}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, lines_used=lines_used, logt=logt)
-
-# def calc_composition(ash_object, dem_combined):
-#     line_databases = {
-#         "si_10_258.37" :["si_10_258_375.1c.template.h5",0],
-#         "s_10_264.23" : ["s__10_264_233.1c.template.h5",0],
-#         # Add more line pairs as needed
-#     }
-
-#     intensities = []
-#     intensity_errors = []
-
-#     for line in line_databases:
-#         Int, Int_error = ash_object.ash.get_intensity(line, outdir=ash_object.outdir, mcmc=True)
-#         intensities.append(Int)
-#         intensity_errors.append(Int_error)
-
-#     emissionLine = EmissionLine(
-#         mcmc_emis,
-#         intensity_obs=mcmc_intensity,
-#         sigma_intensity_obs=mcmc_int_error,
-#         name=line
-#     )
+    return f'{a.outdir}/{a.outdir}_dem_combined.npz'
 
 
-#     temp_bins = TempBins(logt_interp)
+def pred_intensity_compact(emis:np.array, logt:np.array, linename:str, dem:np.array) -> float:
+    mcmc_emis = ContFuncDiscrete(logt, interp_emis_temp(emis) * u.cm ** 5 / u.K,
+                                name=linename)
+    emissionLine = EmissionLine(
+        mcmc_emis,
+        name=linename
+    )
+    temp_bins = TempBins(logt * u.K)
+    return emissionLine._I_pred(temp_bins, dem)
 
-#     int_pred = np.array([line._I_pred(temp_bins, dem_result) for line in mcmc_lines])
+def correct_metadata(map, ratio_name):
+    # Correct the metadata of the map
+    map.meta['measrmnt'] = 'FIP Bias'
+    map.meta.pop('bunit', None)
+    map.meta['line_id'] = ratio_name
+    return map
+
+def calc_composition(filename, np_file, line_database):
+    # I am tired and am probably very dumb in calculating this
+    from sunpy.map import Map
+    a = ashmcmc(filename)
+
+    ldens = a.read_density()
+    dem_median = np.load(np_file)['dem_combined']
+
+    np.load('dem_0.npz',allow_pickle=True)['lines_used'][0][0].name
+    # Retrieve necessary data from ashmcmc object
+    for comp_ratio in line_databases:
+        intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
+        composition = np.zeros_like(ldens)  # Initialize composition matrix
+
+        for num, fip_line in enumerate(comp_ratio):
+            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
+            intensities[:, :, num] = map.data
+
+        for ypix, xpix in np.ndindex(ldens.shape):  # Iterate over each pixel
+            logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
+            logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
+            temp_bins = TempBins(logt_interp * u.K) # Create temp_bin structure for intensity prediction
+            emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio]) # Filter emissivity based on specified lines
+
+            int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_median)
+            dem_scaled = dem_median * (intensities[ypix, xpix, 0] / int_lf)
+            int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][0], dem_scaled)
+            fip_ratio = int_hf/intensities[ypix, xpix, 1]
+            composition[ypix, xpix] = fip_ratio  # Update composition matrix
+            
+        # Create SunPy Map with appropriate metadata
+        map_fip = sunpy.map.Map(composition, map.meta)
+        map_fip = correct_metadata(map_fip, comp_ratio[2])
+        map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio[2]}.fits')
+
+
 
 if __name__ == "__main__":
     filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
-    process_data(filename)
+    np_file = process_data(filename)
+    line_databases = {
+        "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
+        # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
+    }
+
+    calc_composition(filename, np_file, line_databases)
