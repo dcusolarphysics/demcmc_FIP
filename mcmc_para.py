@@ -41,30 +41,6 @@ def check_dem_exists(filename: str) -> bool:
     from os.path import exists
     return exists(filename)    
 
-# def cal_comp():
-#     # Calculate the composition of the plasma
-#     sis = ['si_10_258.37', 'si_10_258.37']
-#     fear = ['fe_14_264.79', 'ar_11_188.81']
-#     for ind, line in enumerate(Lines):
-#         if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
-#             mcmc_emis = emis_sorted[ind, :]
-#             mcmc_emis = ContFuncDiscrete(logt_interp, interp_emis_temp(emis_sorted[ind, :])[loc] * u.cm ** 5 / u.K,
-#                                         name=line)
-#             mcmc_intensity = Intensity[ypix, xpix, ind]
-#             mcmc_int_error = max(Int_error[ypix, xpix, ind], 0.25 * mcmc_intensity)
-#             emissionLine = EmissionLine(
-#                 mcmc_emis,
-#                 intensity_obs=mcmc_intensity,
-#                 sigma_intensity_obs=mcmc_int_error,
-#                 name=line
-#             )
-#             mcmc_lines.append(emissionLine)
-
-#     emissionLine._I_pred(temp_bins, dem_median)
-
-    
-#     int_pred = np.array([line._I_pred(temp_bins, dem_result) for line in mcmc_lines])
-
 def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray, ashmcmc]) -> None:
     from pathlib import Path
     # Process a single pixel with the given arguments
@@ -198,11 +174,10 @@ def calc_composition(filename, np_file, line_database):
     ldens = a.read_density()
     dem_median = np.load(np_file)['dem_combined']
 
-    np.load('dem_0.npz',allow_pickle=True)['lines_used'][0][0].name
     # Retrieve necessary data from ashmcmc object
     for comp_ratio in line_databases:
         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
-        composition = np.zeros_like(ldens)  # Initialize composition matrix
+        composition = np.zeros_like(ldens)  # Initialize composition array
 
         for num, fip_line in enumerate(comp_ratio):
             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
@@ -221,7 +196,7 @@ def calc_composition(filename, np_file, line_database):
             composition[ypix, xpix] = fip_ratio  # Update composition matrix
 
         # Create SunPy Map with appropriate metadata
-        map_fip = sunpy.map.Map(composition, map.meta)
+        map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio[2])
         map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio[2]}.fits')
 
