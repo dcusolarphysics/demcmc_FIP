@@ -29,7 +29,7 @@ def mcmc_process(mcmc_lines: list[EmissionLine], temp_bins: TempBins) -> np.ndar
     # Perform MCMC process for the given MCMC lines and temperature bins
     dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=300, progress=False, dem_guess=None)
     dem_init = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())], axis=0)
-    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=1000, progress=False,
+    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=3000, progress=False,
                                     dem_guess=dem_init)
     dem_median = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())],
                             axis=0)
@@ -203,10 +203,37 @@ def calc_composition(filename, np_file, line_database):
 
 
 if __name__ == "__main__":
-    filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
-    np_file = process_data(filename)
-    line_databases = {
-        "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
-        # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
-    }
-    calc_composition(filename, np_file, line_databases)
+    # filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
+    filenames = ['SO_EIS_data/eis_20230327_061218.data.h5',
+    'SO_EIS_data/eis_20230327_074942.data.h5',
+    'SO_EIS_data/eis_20230327_092942.data.h5',
+    'SO_EIS_data/eis_20230327_112937.data.h5',
+    'SO_EIS_data/eis_20230327_121141.data.h5',
+    'SO_EIS_data/eis_20230327_131642.data.h5',
+    'SO_EIS_data/eis_20230327_143341.data.h5',
+    'SO_EIS_data/eis_20230327_163141.data.h5',
+    'SO_EIS_data/eis_20230327_180811.data.h5',
+    'SO_EIS_data/eis_20230327_194441.data.h5',
+    'SO_EIS_data/eis_20230327_212141.data.h5',
+    'SO_EIS_data/eis_20230327_225811.data.h5',
+    'SO_EIS_data/eis_20230328_002912.data.h5',
+    'SO_EIS_data/eis_20230328_015542.data.h5',
+    'SO_EIS_data/eis_20230328_033248.data.h5',
+    'SO_EIS_data/eis_20230328_050911.data.h5',
+    'SO_EIS_data/eis_20230328_064711.data.h5',
+    'SO_EIS_data/eis_20230328_100341.data.h5',
+    'SO_EIS_data/eis_20230328_115313.data.h5',
+    'SO_EIS_data/eis_20230328_125814.data.h5',
+    'SO_EIS_data/eis_20230328_141513.data.h5',
+    'SO_EIS_data/eis_20230328_152013.data.h5',
+    'SO_EIS_data/eis_20230328_170613.data.h5',
+    'SO_EIS_data/eis_20230328_184243.data.h5',
+    'SO_EIS_data/eis_20230328_201913.data.h5',
+    'SO_EIS_data/eis_20230328_215643.data.h5']
+    for filename in filenames:
+        np_file = process_data(filename)
+        line_databases = {
+            "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
+            # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
+        }
+        calc_composition(filename, np_file, line_databases)
