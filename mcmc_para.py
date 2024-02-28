@@ -179,7 +179,7 @@ def calc_composition(filename, np_file, line_database):
         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
         composition = np.zeros_like(ldens)  # Initialize composition array
 
-        for num, fip_line in enumerate(line_databases[comp_ratio]):  # Iterate only over the first 2 lines
+        for num, fip_line in enumerate(line_databases[comp_ratio][:2]):  # Iterate only over the first 2 lines
             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
             intensities[:, :, num] = map.data
 
