@@ -134,7 +134,7 @@ def process_data(filename: str) -> None:
 
     # Determine the operating system type (Linux or macOS)
     # Set the number of processes based on the operating system
-    if platform.system() == "Linux": process_num = 70
+    if platform.system() == "Linux": process_num = 80
     elif platform.system() == "Darwin": process_num = 10
     else: process_num = 10 
 
