@@ -137,7 +137,8 @@ def process_data(filename: str) -> None:
         results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
 
     # Combine the DEM files into a single array
-    print('-----------------------Combining DEM files-----------------------')
+    print('------------------------------Combining DEM files------------------------------')
+    print(Intensity.shape)
     dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     np.save(f'{a.outdir}/{a.outdir}_dem_combined.npy', dem_combined)
 
