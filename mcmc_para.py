@@ -47,7 +47,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
     xpix, Intensity, Int_error, Lines, ldens, a = args
     output_file = f'{a.outdir}/dem_columns/dem_{xpix}.npz'
     # Extract the directory path from the output_file
-    output_dir = output_file.parent
+    output_dir = Path(output_file).parent
 
     # Check if the directory exists, and create it if it doesn't
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -137,6 +137,7 @@ def process_data(filename: str) -> None:
         results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
 
     # Combine the DEM files into a single array
+    print('-----------------------Combining DEM files-----------------------')
     dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     np.save(f'{a.outdir}/{a.outdir}_dem_combined.npy', dem_combined)
 
