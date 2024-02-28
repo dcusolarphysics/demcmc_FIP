@@ -187,7 +187,7 @@ def calc_composition(filename, np_file, line_database):
             logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
             logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
             temp_bins = TempBins(logt_interp * u.K) # Create temp_bin structure for intensity prediction
-            emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio]) # Filter emissivity based on specified lines
+            emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2]) # Filter emissivity based on specified lines
 
             int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_median)
             dem_scaled = dem_median * (intensities[ypix, xpix, 0] / int_lf)
