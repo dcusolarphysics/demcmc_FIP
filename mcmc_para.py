@@ -103,7 +103,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     from glob import glob
     from re import search
 
-    dem_files = sorted(glob(f'{dir}/dem*.npz'))
+    dem_files = sorted(glob(f'{dir}/dem_columns/dem*.npz'))
     ref = np.load(dem_files[0])['dem_results'].shape
     dem_combined = np.zeros((ydim,xdim,ref[1]))
 
@@ -138,9 +138,10 @@ def process_data(filename: str) -> None:
 
     # Combine the DEM files into a single array
     print('------------------------------Combining DEM files------------------------------')
-    print(Intensity.shape)
     dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     np.save(f'{a.outdir}/{a.outdir}_dem_combined.npy', dem_combined)
+
+def calc_composition():
 
 if __name__ == "__main__":
     filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
