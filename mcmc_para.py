@@ -70,7 +70,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
             for ind, line in enumerate(Lines):
                 if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
                     mcmc_emis = emis_sorted[ind, :]
-                    mcmc_emis = ContFuncDiscrete(logt_interp, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
+                    mcmc_emis = ContFuncDiscrete(logt_interp*u.K, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
                                                 name=line)
                     mcmc_intensity = Intensity[ypix, xpix, ind]
                     mcmc_int_error = max(Int_error[ypix, xpix, ind], 0.25 * mcmc_intensity)
@@ -150,7 +150,7 @@ def process_data(filename: str) -> None:
 
 
 def pred_intensity_compact(emis:np.array, logt:np.array, linename:str, dem:np.array) -> float:
-    mcmc_emis = ContFuncDiscrete(logt, interp_emis_temp(emis) * u.cm ** 5 / u.K,
+    mcmc_emis = ContFuncDiscrete(logt*u.K, interp_emis_temp(emis) * u.cm ** 5 / u.K,
                                 name=linename)
     emissionLine = EmissionLine(
         mcmc_emis,
@@ -191,7 +191,7 @@ def calc_composition(filename, np_file, line_database):
 
             int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_median)
             dem_scaled = dem_median * (intensities[ypix, xpix, 0] / int_lf)
-            int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][0], dem_scaled)
+            int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][1], dem_scaled)
             fip_ratio = int_hf/intensities[ypix, xpix, 1]
             composition[ypix, xpix] = fip_ratio  # Update composition matrix
 
