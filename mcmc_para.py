@@ -62,7 +62,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
             mcmc_lines = []
 
             for ind, line in enumerate(Lines):
-                if Intensity[ypix, xpix, ind] > 10:
+                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
                     mcmc_emis = emis_sorted[ind, :]
                     mcmc_emis = ContFuncDiscrete(logt_interp, interp_emis_temp(emis_sorted[ind, :])[loc] * u.cm ** 5 / u.K,
                                                 name=line)
@@ -92,6 +92,19 @@ def download_data(filename: str) -> None:
     from eispac.download import download_hdf5_data
     download_hdf5_data(filename, local_top='SO_EIS_data', overwrite=False)
 
+def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
+    from glob import glob
+    from re import search
+
+    dem_files = sorted(glob(f'{dir}/dem*.npz'))
+    ref = np.load(dem_files[0])['dem_results'].shape
+    dem_combined = np.zeros((ydim,xdim,ref[1]))
+
+    for dem_file in dem_files:
+        xpix_loc = search(r'dem_(\d+)\.npz$', dem_file).group(1)
+        dem_combined[:,int(xpix_loc), :] = np.load(dem_file)['dem_results'] 
+    return dem_combined
+
 def process_data(filename: str) -> None:
     # Create an ashmcmc object with the specified filename
     import platform
@@ -106,20 +119,17 @@ def process_data(filename: str) -> None:
     args_list = [(xpix, Intensity, Int_error, Lines, ldens, a) for xpix in range(Intensity.shape[1])]
 
     # Determine the operating system type (Linux or macOS)
-    system_type = platform.system()
-
     # Set the number of processes based on the operating system
-    if system_type == "Linux":
-        process_num = 64
-    elif system_type == "Darwin":
-        process_num = 10
-    else:
-        process_num = 4  # Default value for other operating systems
+    if platform.system() == "Linux": process_num = 70
+    elif platform.system() == "Darwin": process_num = 10
+    else: process_num = 10 
 
     # Create a Pool of processes for parallel execution
     with Pool(processes=process_num) as pool:
         results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
 
+    # Combine the DEM files into a single array
+    dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
 if __name__ == "__main__":
     filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
     process_data(filename)
