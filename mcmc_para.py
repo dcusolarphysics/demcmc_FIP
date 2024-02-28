@@ -153,10 +153,6 @@ def process_data(filename: str) -> None:
     Lines, Intensity, Int_error = a.fit_data(plot=False)
     ldens = a.read_density()
     
-    for ypix in tqdm(range(Intensity.shape[0])):
-
-        logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix])
-
     # Generate a list of arguments for process_pixel function
     args_list = [(xpix, Intensity, Int_error, Lines, ldens, a) for xpix in range(Intensity.shape[1])]
 
@@ -223,7 +219,7 @@ def calc_composition(filename, np_file, line_database):
             int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][0], dem_scaled)
             fip_ratio = int_hf/intensities[ypix, xpix, 1]
             composition[ypix, xpix] = fip_ratio  # Update composition matrix
-            
+
         # Create SunPy Map with appropriate metadata
         map_fip = sunpy.map.Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio[2])
@@ -238,5 +234,4 @@ if __name__ == "__main__":
         "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
         # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
     }
-
     calc_composition(filename, np_file, line_databases)
