@@ -141,7 +141,7 @@ def process_data(filename: str) -> None:
     dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     np.save(f'{a.outdir}/{a.outdir}_dem_combined.npy', dem_combined)
 
-def calc_composition():
+# def calc_composition():
 
 if __name__ == "__main__":
     filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
