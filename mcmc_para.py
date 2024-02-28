@@ -42,9 +42,16 @@ def check_dem_exists(filename: str) -> bool:
     return exists(filename)    
 
 def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray, ashmcmc]) -> None:
+    from pathlib import Path
     # Process a single pixel with the given arguments
     xpix, Intensity, Int_error, Lines, ldens, a = args
-    output_file = f'{a.outdir}/dem_{xpix}.npz'
+    output_file = f'{a.outdir}/dem_columns/dem_{xpix}.npz'
+    # Extract the directory path from the output_file
+    output_dir = output_file.parent
+
+    # Check if the directory exists, and create it if it doesn't
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     ycoords_out = []
     dem_results = []
     chi2_results = []
@@ -103,6 +110,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     for dem_file in dem_files:
         xpix_loc = search(r'dem_(\d+)\.npz$', dem_file).group(1)
         dem_combined[:,int(xpix_loc), :] = np.load(dem_file)['dem_results'] 
+
     return dem_combined
 
 def process_data(filename: str) -> None:
@@ -130,6 +138,8 @@ def process_data(filename: str) -> None:
 
     # Combine the DEM files into a single array
     dem_combined = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
+    np.save(f'{a.outdir}/{a.outdir}_dem_combined.npy', dem_combined)
+
 if __name__ == "__main__":
     filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
     process_data(filename)
