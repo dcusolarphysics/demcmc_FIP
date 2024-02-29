@@ -237,8 +237,8 @@ if __name__ == "__main__":
         try:
             np_file = process_data(filename)
             line_databases = {
-                "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
-                "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
+                "sis" :['si_10_258.37','s_10_264.23', 'SiX_SX'],
+                "fear" : ['fe_14_264.79', 'ar_11_188.81', 'FeXVI_Ar_XI']
             }
             calc_composition(filename, np_file, line_databases)
         except Exception as e:
