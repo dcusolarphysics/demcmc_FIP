@@ -172,7 +172,8 @@ def calc_composition(filename, np_file, line_database):
     a = ashmcmc(filename)
 
     ldens = a.read_density()
-    dem_median = np.load(np_file)['dem_combined']
+    dem_data = np.load(np_file)
+    dem_median = dem_data['dem_combined']
 
     # Retrieve necessary data from ashmcmc object
     for comp_ratio in line_databases:
@@ -195,10 +196,12 @@ def calc_composition(filename, np_file, line_database):
             fip_ratio = int_hf/intensities[ypix, xpix, 1]
             composition[ypix, xpix] = fip_ratio  # Update composition matrix
 
+        np.savez(f'{a.outdir}/{a.outdir}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
+
         # Create SunPy Map with appropriate metadata
         map_fip = Map(composition, map.meta)
-        map_fip = correct_metadata(map_fip, comp_ratio[2])
-        map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio[2]}.fits')
+        map_fip = correct_metadata(map_fip, comp_ratio)
+        map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio}.fits')
 
 
 
@@ -235,8 +238,8 @@ if __name__ == "__main__":
             np_file = process_data(filename)
             line_databases = {
                 "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
-                # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
+                "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
             }
             calc_composition(filename, np_file, line_databases)
-        except:
-            pass
+        except Exception as e:
+            print(f"Failed: {e}")
