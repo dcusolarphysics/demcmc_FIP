@@ -204,7 +204,7 @@ def calc_composition(filename, np_file, line_database):
 
 if __name__ == "__main__":
     # filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
-    filenames = ['SO_EIS_data/eis_20230327_061218.data.h5',
+    filenames = [
     'SO_EIS_data/eis_20230327_074942.data.h5',
     'SO_EIS_data/eis_20230327_092942.data.h5',
     'SO_EIS_data/eis_20230327_112937.data.h5',
@@ -231,9 +231,12 @@ if __name__ == "__main__":
     'SO_EIS_data/eis_20230328_201913.data.h5',
     'SO_EIS_data/eis_20230328_215643.data.h5']
     for filename in filenames:
-        np_file = process_data(filename)
-        line_databases = {
-            "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
-            # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
-        }
-        calc_composition(filename, np_file, line_databases)
+        try:
+            np_file = process_data(filename)
+            line_databases = {
+                "sis" :['si_10_258.37','s_10_264.23', 'Si X-S X'],
+                # "fear" : ['fe_14_264.79', 'ar_11_188.81', 'Fe XVI-Ar XI']
+            }
+            calc_composition(filename, np_file, line_databases)
+        except:
+            pass
