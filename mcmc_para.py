@@ -99,7 +99,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
 
 def download_data(filename: str) -> None:
     from eispac.download import download_hdf5_data
-    download_hdf5_data(filename, local_top='SO_EIS_data', overwrite=False)
+    download_hdf5_data(filename.split('/')[-1], local_top='SO_EIS_data', overwrite=False)
 
 def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     from glob import glob
