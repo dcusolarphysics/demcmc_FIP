@@ -69,7 +69,7 @@ class ashmcmc:
 
         Intensities = np.zeros((int(dim[0]), int(dim[1]), dem_num))    
         Int_error = np.zeros((int(dim[0]), int(dim[1]), dem_num))    
-        print(f'Found {dem_num} usable lines')
+        print(f'------------------------------Found {dem_num} usable lines------------------------------')
         for ind, line in tqdm(enumerate(Lines)):
             Intensities[:, :, ind], Int_error[:, :, ind] = self.ash.get_intensity(line, outdir=self.outdir, mcmc=True, **kwargs)
 
@@ -90,7 +90,7 @@ class ashmcmc:
         import astropy.units as u
         # Find matching file based on density
         emis_file = readsav(find_matching_file(ldens, abund_file=abund_file))
-        print(find_matching_file(ldens, abund_file=abund_file))
+        # print(find_matching_file(ldens, abund_file=abund_file))
         logt = 10**emis_file['logt_interpolated']*u.K
         emis = emis_file['emissivity_combined']
         linenames = emis_file['linenames'].astype(str)
@@ -111,12 +111,6 @@ class ashmcmc:
         # Process mcmc lines
         process_data(self.filename)
 
-    def get_composition(self):
-        # Get composition from asheis object
-        # Returns an array of compositions
-        return self.ash.get_composition(outdir=self.outdir, mcmc=True)    
-    # def mcmcdem(self)
-        
     
 if __name__ == "__main__":
     ash_mcmc = ashmcmc()
