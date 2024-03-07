@@ -255,6 +255,7 @@ def calc_composition(filename, np_file, line_database):
 if __name__ == "__main__":
     # filename = ['SO_EIS_data/eis_20230405_220513.data.h5']
     filenames = [
+    'SO_EIS_data/eis_20230405_220513.data.h5',
     'SO_EIS_data/eis_20230327_131642.data.h5',
     'SO_EIS_data/eis_20230327_143341.data.h5',
     'SO_EIS_data/eis_20230327_163141.data.h5',
