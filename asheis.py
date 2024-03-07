@@ -47,7 +47,7 @@ class asheis:
             "fe_12_195.12" : ["fe_12_195_119.2c.template.h5",0],
             "fe_12_192.39" : ["fe_12_192_394.1c.template.h5",0],
             "fe_13_202.04" : ["fe_13_202_044.1c.template.h5",0],
-            "fe_13_203.83" : ["fe_13_203_826.2c.template.h5",1],
+            "fe_13_203.83" : ["fe_13_203_826.2c.template.h5",2],
             "fe_14_264.79" : ["fe_14_264_787.1c.template.h5",0],
             "fe_14_270.52" : ["fe_14_270_519.2c.template.h5",1],
             "fe_15_284.16" : ["fe_15_284_160.2c.template.h5",1],
@@ -87,7 +87,10 @@ class asheis:
         # if self rebin != False:
         print(path)
         if path.is_file() == False or refit==True or self.rebin!=False:
-            template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
+            if template_name != 'fe_13_203_826.2c.template.h5':
+                template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
+            else:
+                template = eispac.read_template('my_Fe_XIII_template-3c.h5')
             cube = eispac.read_cube(self.filename, window=template.central_wave)
             if self.rebin != False:
                 print('Rebinning')
