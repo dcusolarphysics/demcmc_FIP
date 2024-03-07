@@ -208,7 +208,7 @@ def calc_composition(filename, np_file, line_database):
 if __name__ == "__main__":
     # filename = ['SO_EIS_data/eis_20230405_220513.data.h5']
     filenames = [
-    'SO_EIS_data/eis_20230405_220513.data.h5'
+    'SO_EIS_data/eis_20230405_220513.data.h5',
     'SO_EIS_data/eis_20230327_074942.data.h5',
     'SO_EIS_data/eis_20230327_092942.data.h5',
     'SO_EIS_data/eis_20230327_112937.data.h5',
@@ -244,3 +244,5 @@ if __name__ == "__main__":
             calc_composition(filename, np_file, line_databases)
         except Exception as e:
             print(f"Failed: {e}")
+
+#python mcmc_para.py
