@@ -68,7 +68,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
             mcmc_lines = []
 
             for ind, line in enumerate(Lines):
-                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
+                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10) and (line != 'fe_13_203.83'):
                     mcmc_emis = emis_sorted[ind, :]
                     mcmc_emis = ContFuncDiscrete(logt_interp*u.K, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
                                                 name=line)
@@ -206,8 +206,9 @@ def calc_composition(filename, np_file, line_database):
 
 
 if __name__ == "__main__":
-    # filename = 'SO_EIS_data/eis_20230405_220513.data.h5'
+    # filename = ['SO_EIS_data/eis_20230405_220513.data.h5']
     filenames = [
+    'SO_EIS_data/eis_20230405_220513.data.h5'
     'SO_EIS_data/eis_20230327_074942.data.h5',
     'SO_EIS_data/eis_20230327_092942.data.h5',
     'SO_EIS_data/eis_20230327_112937.data.h5',
