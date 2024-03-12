@@ -273,13 +273,25 @@ if __name__ == "__main__":
     # 'SO_EIS_data/eis_20230328_064711.data.h5',
     # 'SO_EIS_data/eis_20230328_100341.data.h5',
     # 'SO_EIS_data/eis_20230328_115313.data.h5',
-    'SO_EIS_data/eis_20230328_125814.data.h5',
-    'SO_EIS_data/eis_20230328_141513.data.h5',
-    'SO_EIS_data/eis_20230328_152013.data.h5',
-    'SO_EIS_data/eis_20230328_170613.data.h5',
-    'SO_EIS_data/eis_20230328_184243.data.h5',
-    'SO_EIS_data/eis_20230328_201913.data.h5',
-    'SO_EIS_data/eis_20230328_215643.data.h5']
+
+    # 'SO_EIS_data/eis_20230328_125814.data.h5',
+    # 'SO_EIS_data/eis_20230328_141513.data.h5',
+    # 'SO_EIS_data/eis_20230328_152013.data.h5',
+    # 'SO_EIS_data/eis_20230328_170613.data.h5',
+    # 'SO_EIS_data/eis_20230328_184243.data.h5',
+    # 'SO_EIS_data/eis_20230328_201913.data.h5',
+    # 'SO_EIS_data/eis_20230328_215643.data.h5',
+    
+    'SO_EIS_data/eis_20230329_125412.data.h5',
+    'SO_EIS_data/eis_20230329_150123.data.h5',
+    'SO_EIS_data/eis_20230330_120319.data.h5',
+    'SO_EIS_data/eis_20230330_182556.data.h5',
+    'SO_EIS_data/eis_20230331_083402.data.h5',
+    'SO_EIS_data/eis_20230331_185225.data.h5',
+    'SO_EIS_data/eis_20230331_212335.data.h5',
+    'SO_EIS_data/eis_20230401_160314.data.h5',
+    'SO_EIS_data/eis_20230401_201027.data.h5',
+    ]
     for filename in filenames:
         try:
             np_file = process_data(filename)
