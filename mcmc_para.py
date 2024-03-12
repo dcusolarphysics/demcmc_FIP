@@ -20,9 +20,7 @@ def calc_chi2(mcmc_lines: list[EmissionLine], dem_result: np.array, temp_bins: T
     int_obs = np.array([line.intensity_obs for line in mcmc_lines])
     int_pred = np.array([line._I_pred(temp_bins, dem_result) for line in mcmc_lines])
     sigma_intensity_obs = np.array([line.sigma_intensity_obs for line in mcmc_lines])
-
-    chi2_line = ((int_pred - int_obs) / sigma_intensity_obs) ** 2
-    chi2 = np.sum(chi2_line)
+    chi2 = np.sum(((int_pred - int_obs) / sigma_intensity_obs) ** 2)
     return chi2
 
 def mcmc_process(mcmc_lines: list[EmissionLine], temp_bins: TempBins) -> np.ndarray:
@@ -88,8 +86,6 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
             chi2_results.append(chi2)
             ycoords_out.append(ypix)
             linenames_list.append(mcmc_lines)
-
-
 
         dem_results = np.array(dem_results)
         chi2_results = np.array(chi2_results)
@@ -184,6 +180,7 @@ def calc_composition(filename, np_file, line_database):
             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
             intensities[:, :, num] = map.data
 
+        print(f'------------------------------Calculating {line_databases[comp_ratio][2]} FIP Bias------------------------------')
         for ypix, xpix in tqdm(np.ndindex(ldens.shape)):  # Iterate over each pixel
             logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
             logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
@@ -255,27 +252,27 @@ def calc_composition(filename, np_file, line_database):
 if __name__ == "__main__":
     # filename = ['SO_EIS_data/eis_20230405_220513.data.h5']
     filenames = [
-    'SO_EIS_data/eis_20071017_024748.data.h5',
-    'SO_EIS_data/eis_20230405_220513.data.h5',
-    'SO_EIS_data/eis_20230327_131642.data.h5',
-    'SO_EIS_data/eis_20230327_143341.data.h5',
-    'SO_EIS_data/eis_20230327_163141.data.h5',
-    'SO_EIS_data/eis_20230405_220513.data.h5',
-    'SO_EIS_data/eis_20230327_074942.data.h5',
-    'SO_EIS_data/eis_20230327_092942.data.h5',
-    'SO_EIS_data/eis_20230327_112937.data.h5',
-    'SO_EIS_data/eis_20230327_121141.data.h5',
-    'SO_EIS_data/eis_20230327_180811.data.h5',
-    'SO_EIS_data/eis_20230327_194441.data.h5',
-    'SO_EIS_data/eis_20230327_212141.data.h5',
-    'SO_EIS_data/eis_20230327_225811.data.h5',
-    'SO_EIS_data/eis_20230328_002912.data.h5',
-    'SO_EIS_data/eis_20230328_015542.data.h5',
-    'SO_EIS_data/eis_20230328_033248.data.h5',
-    'SO_EIS_data/eis_20230328_050911.data.h5',
-    'SO_EIS_data/eis_20230328_064711.data.h5',
-    'SO_EIS_data/eis_20230328_100341.data.h5',
-    'SO_EIS_data/eis_20230328_115313.data.h5',
+    # 'SO_EIS_data/eis_20071017_024748.data.h5',
+    # 'SO_EIS_data/eis_20230405_220513.data.h5',
+    # 'SO_EIS_data/eis_20230327_131642.data.h5',
+    # 'SO_EIS_data/eis_20230327_143341.data.h5',
+    # 'SO_EIS_data/eis_20230327_163141.data.h5',
+    # 'SO_EIS_data/eis_20230405_220513.data.h5',
+    # 'SO_EIS_data/eis_20230327_074942.data.h5',
+    # 'SO_EIS_data/eis_20230327_092942.data.h5',
+    # 'SO_EIS_data/eis_20230327_112937.data.h5',
+    # 'SO_EIS_data/eis_20230327_121141.data.h5',
+    # 'SO_EIS_data/eis_20230327_180811.data.h5',
+    # 'SO_EIS_data/eis_20230327_194441.data.h5',
+    # 'SO_EIS_data/eis_20230327_212141.data.h5',
+    # 'SO_EIS_data/eis_20230327_225811.data.h5',
+    # 'SO_EIS_data/eis_20230328_002912.data.h5',
+    # 'SO_EIS_data/eis_20230328_015542.data.h5',
+    # 'SO_EIS_data/eis_20230328_033248.data.h5',
+    # 'SO_EIS_data/eis_20230328_050911.data.h5',
+    # 'SO_EIS_data/eis_20230328_064711.data.h5',
+    # 'SO_EIS_data/eis_20230328_100341.data.h5',
+    # 'SO_EIS_data/eis_20230328_115313.data.h5',
     'SO_EIS_data/eis_20230328_125814.data.h5',
     'SO_EIS_data/eis_20230328_141513.data.h5',
     'SO_EIS_data/eis_20230328_152013.data.h5',

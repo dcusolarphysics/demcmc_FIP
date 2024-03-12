@@ -37,7 +37,6 @@ def find_matching_file(log_density, abund_file = 'emissivities_sun_photospheric_
     return matching_file
 
 def interp_emis_temp(original_array):
-
     # Interpolate into array with size 401
     new_size = 70
     new_indices = np.linspace(0, len(original_array) - 1, new_size)
@@ -103,7 +102,6 @@ class ashmcmc:
         emis_sorted = np.zeros((len(obs_Lines),101))
         for ind, line in enumerate(obs_Lines):
             emis_sorted[ind, :] = emis[np.where(linenames == line)]
-
         return emis_sorted
     
     def mcmc_process(self):
