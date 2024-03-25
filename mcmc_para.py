@@ -5,6 +5,8 @@ import numpy as np
 import astropy.units as u
 from ashmcmc import ashmcmc, interp_emis_temp
 import argparse
+import platform
+
 
 from demcmc import (
     EmissionLine,
