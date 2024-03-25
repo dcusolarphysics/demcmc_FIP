@@ -6,8 +6,6 @@ import astropy.units as u
 from ashmcmc import ashmcmc, interp_emis_temp
 import argparse
 import platform
-
-
 from demcmc import (
     EmissionLine,
     TempBins,
@@ -252,7 +250,7 @@ if __name__ == "__main__":
 
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
-    parser.add_argument('-c', '--cores', type=int, default=default_processes,
+    parser.add_argument('-p', '--processes', type=int, default=default_processes,
                         help='Number of processes to use (default: {})'.format(default_processes))
     args = parser.parse_args()
 
