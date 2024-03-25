@@ -14,25 +14,8 @@ from demcmc import (
     ContFuncDiscrete,
 )
 from demcmc.units import u_temp, u_dem
+from mcmc_utils import calc_chi2, mcmc_process
 
-def calc_chi2(mcmc_lines: list[EmissionLine], dem_result: np.array, temp_bins: TempBins) -> float:
-    # Calculate the chi-square value for the given MCMC lines, DEM result, and temperature bins
-    int_obs = np.array([line.intensity_obs for line in mcmc_lines])
-    int_pred = np.array([line._I_pred(temp_bins, dem_result) for line in mcmc_lines])
-    sigma_intensity_obs = np.array([line.sigma_intensity_obs for line in mcmc_lines])
-    chi2 = np.sum(((int_pred - int_obs) / sigma_intensity_obs) ** 2)
-    return chi2
-
-def mcmc_process(mcmc_lines: list[EmissionLine], temp_bins: TempBins) -> np.ndarray:
-    # Perform MCMC process for the given MCMC lines and temperature bins
-    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=300, progress=False, dem_guess=None)
-    dem_init = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())], axis=0)
-    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=500, progress=False,
-                                    dem_guess=dem_init)
-    dem_median = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())],
-                            axis=0)
-
-    return dem_median
 
 def check_dem_exists(filename: str) -> bool:
     # Check if the DEM file exists
@@ -67,7 +50,6 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
 
             for ind, line in enumerate(Lines):
                 if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10):
-                    mcmc_emis = emis_sorted[ind, :]
                     mcmc_emis = ContFuncDiscrete(logt_interp*u.K, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
                                                 name=line)
                     mcmc_intensity = Intensity[ypix, xpix, ind]
@@ -130,7 +112,7 @@ def process_data(filename: str) -> None:
 
     # Determine the operating system type (Linux or macOS)
     # Set the number of processes based on the operating system
-    if platform.system() == "Linux": process_num = 60 # above 64 seems to break the MSSL machine
+    if platform.system() == "Linux": process_num = 60 # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin": process_num = 10
     else: process_num = 10 
 
@@ -249,58 +231,43 @@ def calc_composition(filename, np_file, line_database):
 #         map_fip = correct_metadata(map_fip, comp_ratio)
 #         map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio}.fits')
 
+import os
+
+def update_filenames_txt(old_filename, new_filename):
+    with open("config.txt", "r") as file:
+        lines = file.readlines()
+
+    with open("config.txt", "w") as file:
+        for line in lines:
+            if line.strip() == old_filename:
+                file.write(new_filename + "\n")
+            else:
+                file.write(line)
+
 if __name__ == "__main__":
-    # filename = ['SO_EIS_data/eis_20230405_220513.data.h5']
-    filenames = [
-    # 'SO_EIS_data/eis_20071017_024748.data.h5',
-    # 'SO_EIS_data/eis_20230405_220513.data.h5',
-    # 'SO_EIS_data/eis_20230327_131642.data.h5',
-    # 'SO_EIS_data/eis_20230327_143341.data.h5',
-    # 'SO_EIS_data/eis_20230327_163141.data.h5',
-    # 'SO_EIS_data/eis_20230405_220513.data.h5',
-    # 'SO_EIS_data/eis_20230327_074942.data.h5',
-    # 'SO_EIS_data/eis_20230327_092942.data.h5',
-    # 'SO_EIS_data/eis_20230327_112937.data.h5',
-    # 'SO_EIS_data/eis_20230327_121141.data.h5',
-    # 'SO_EIS_data/eis_20230327_180811.data.h5',
-    # 'SO_EIS_data/eis_20230327_194441.data.h5',
-    # 'SO_EIS_data/eis_20230327_212141.data.h5',
-    # 'SO_EIS_data/eis_20230327_225811.data.h5',
-    # 'SO_EIS_data/eis_20230328_002912.data.h5',
-    # 'SO_EIS_data/eis_20230328_015542.data.h5',
-    # 'SO_EIS_data/eis_20230328_033248.data.h5',
-    # 'SO_EIS_data/eis_20230328_050911.data.h5',
-    # 'SO_EIS_data/eis_20230328_064711.data.h5',
-    # 'SO_EIS_data/eis_20230328_100341.data.h5',
-    # 'SO_EIS_data/eis_20230328_115313.data.h5',
+    # Read filenames from a text file
+    with open("config.txt", "r") as file:
+        filenames = [line.strip() for line in file]
 
-    'SO_EIS_data/eis_20230328_125814.data.h5',
-    'SO_EIS_data/eis_20230328_141513.data.h5',
-    'SO_EIS_data/eis_20230328_152013.data.h5',
-    'SO_EIS_data/eis_20230328_170613.data.h5',
-    'SO_EIS_data/eis_20230328_184243.data.h5',
-    'SO_EIS_data/eis_20230328_201913.data.h5',
-    'SO_EIS_data/eis_20230328_215643.data.h5',
-    
-    # 'SO_EIS_data/eis_20230329_125412.data.h5',
-    # 'SO_EIS_data/eis_20230329_150123.data.h5',
-    # 'SO_EIS_data/eis_20230330_120319.data.h5',
-    # 'SO_EIS_data/eis_20230330_182556.data.h5',
-    # 'SO_EIS_data/eis_20230331_083402.data.h5',
-    # 'SO_EIS_data/eis_20230331_185225.data.h5',
-    # 'SO_EIS_data/eis_20230331_212335.data.h5',
-    # 'SO_EIS_data/eis_20230401_160314.data.h5',
-    # 'SO_EIS_data/eis_20230401_201027.data.h5',
-    ]
     for filename in filenames:
-        try:
-            np_file = process_data(filename)
-            line_databases = {
-                "sis" :['si_10_258.37','s_10_264.23', 'SiX_SX'],
-                "fear" : ['fe_14_264.79', 'ar_11_188.81', 'FeXVI_Ar_XI']
-            }
-            calc_composition(filename, np_file, line_databases)
-        except Exception as e:
-            print(f"Failed: {e}")
+        # Check if the file has already been processed
+        if not filename.endswith("[processed]"):
+            try:
+                # Add "[processing]" to the end of the filename in filenames.txt
+                processing_filename = filename + " [processing]"
+                update_filenames_txt(filename, processing_filename)
 
-#python mcmc_para.py
+                np_file = process_data(filename)
+                line_databases = {
+                    "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
+                    "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
+                }
+                calc_composition(filename, np_file, line_databases)
+
+                # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
+                processed_filename = filename + " [processed]"
+                update_filenames_txt(processing_filename, processed_filename)
+            except Exception as e:
+                print(f"Failed: {e}")
+
+    #python mcmc_para.py

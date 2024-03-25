@@ -191,7 +191,7 @@ class asheis:
             "FeS": ['fe_16_262', 's_13_256', 'Fe XVI-S XIII'],
             "SAr": ['s_13_256', 'ar_14_194', 'S XIII-Ar XIV'],
             "SAr2": ['s_11_188', 'ar_11_188', 'S XI-Ar XI'],
-            "FeAr": ['fe_16_262', 'ar_11_188', 'Fe XVI-Ar XI'],
+            # "FeAr": ['fe_16_262', 'ar_11_188', 'Fe XVI-Ar XI'], wrong dignostic
             # Add more line pairs as needed
         }
 
