@@ -98,44 +98,28 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
         lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file, allow_pickle=True)['lines_used']])
     return dem_combined, chi2_combined, lines_used, logt
 
-def process_data(filename: str) -> None:
+def process_data(filename: str, num_processes: int) -> None:
     # Create an ashmcmc object with the specified filename
-    import platform
     download_data(filename)
     a = ashmcmc(filename)
 
     # Retrieve necessary data from ashmcmc object
     Lines, Intensity, Int_error = a.fit_data(plot=False)
     ldens = a.read_density()
-    
+
     # Generate a list of arguments for process_pixel function
     args_list = [(xpix, Intensity, Int_error, Lines, ldens, a) for xpix in range(Intensity.shape[1])]
 
-    # Determine the operating system type (Linux or macOS)
-    # Set the number of processes based on the operating system
-    if platform.system() == "Linux":
-        default_processes = 60  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
-    elif platform.system() == "Darwin":
-        default_processes = 10
-    else:
-        default_processes = 10
-
-    # Create an argument parser
-    parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
-    parser.add_argument('-c', '--core', type=int, default=default_processes,
-                        help='Number of processes to use (default: {})'.format(default_processes))
-    args = parser.parse_args()
-
     # Create a Pool of processes for parallel execution
-    with Pool(processes=args.processes) as pool:
+    with Pool(processes=num_processes) as pool:
         results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
 
     # Combine the DEM files into a single array
     print('------------------------------Combining DEM files------------------------------')
     dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     np.savez(f'{a.outdir}/{a.outdir}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, lines_used=lines_used, logt=logt)
-    return f'{a.outdir}/{a.outdir}_dem_combined.npz'
 
+    return f'{a.outdir}/{a.outdir}_dem_combined.npz'
 
 def pred_intensity_compact(emis:np.array, logt:np.array, linename:str, dem:np.array) -> float:
     mcmc_emis = ContFuncDiscrete(logt*u.K, interp_emis_temp(emis) * u.cm ** 5 / u.K,
@@ -255,6 +239,21 @@ def update_filenames_txt(old_filename, new_filename):
                 file.write(line)
 
 if __name__ == "__main__":
+    # Determine the operating system type (Linux or macOS)
+    # Set the default number of processes based on the operating system
+    if platform.system() == "Linux":
+        default_processes = 60  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+    elif platform.system() == "Darwin":
+        default_processes = 10
+    else:
+        default_processes = 10
+
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
+    parser.add_argument('-c', '--cores', type=int, default=default_processes,
+                        help='Number of processes to use (default: {})'.format(default_processes))
+    args = parser.parse_args()
+
     # Read filenames from a text file
     with open("config.txt", "r") as file:
         filenames = [line.strip() for line in file]
@@ -267,7 +266,8 @@ if __name__ == "__main__":
                 processing_filename = filename + " [processing]"
                 update_filenames_txt(filename, processing_filename)
 
-                np_file = process_data(filename)
+                np_file = process_data(filename, args.processes)
+
                 line_databases = {
                     "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
                     "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
@@ -277,7 +277,6 @@ if __name__ == "__main__":
                 # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
                 processed_filename = filename + " [processed]"
                 update_filenames_txt(processing_filename, processed_filename)
+
             except Exception as e:
                 print(f"Failed: {e}")
-
-    #python mcmc_para.py
