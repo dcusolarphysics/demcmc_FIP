@@ -4,6 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import astropy.units as u
 from ashmcmc import ashmcmc, interp_emis_temp
+import argparse
 
 from demcmc import (
     EmissionLine,
@@ -112,12 +113,21 @@ def process_data(filename: str) -> None:
 
     # Determine the operating system type (Linux or macOS)
     # Set the number of processes based on the operating system
-    if platform.system() == "Linux": process_num = 60 # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
-    elif platform.system() == "Darwin": process_num = 10
-    else: process_num = 10 
+    if platform.system() == "Linux":
+        default_processes = 60  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+    elif platform.system() == "Darwin":
+        default_processes = 10
+    else:
+        default_processes = 10
+
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
+    parser.add_argument('-c', '--core', type=int, default=default_processes,
+                        help='Number of processes to use (default: {})'.format(default_processes))
+    args = parser.parse_args()
 
     # Create a Pool of processes for parallel execution
-    with Pool(processes=process_num) as pool:
+    with Pool(processes=args.processes) as pool:
         results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
 
     # Combine the DEM files into a single array
