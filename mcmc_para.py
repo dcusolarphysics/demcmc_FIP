@@ -261,22 +261,22 @@ if __name__ == "__main__":
     for filename in filenames:
         # Check if the file has already been processed
         if not filename.endswith("[processed]"):
-            try:
-                # Add "[processing]" to the end of the filename in filenames.txt
-                processing_filename = filename + " [processing]"
-                update_filenames_txt(filename, processing_filename)
+            # try:
+            # Add "[processing]" to the end of the filename in filenames.txt
+            processing_filename = filename + " [processing]"
+            update_filenames_txt(filename, processing_filename)
+            print(f"Processing: {filename}")
+            np_file = process_data(filename, args.cores)
+            print(f"Processed: {filename}")
+            line_databases = {
+                "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
+                "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
+            }
+            calc_composition(filename, np_file, line_databases)
 
-                np_file = process_data(filename, args.cores)
+            # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
+            processed_filename = filename + " [processed]"
+            update_filenames_txt(processing_filename, processed_filename)
 
-                line_databases = {
-                    "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
-                    "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
-                }
-                calc_composition(filename, np_file, line_databases)
-
-                # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
-                processed_filename = filename + " [processed]"
-                update_filenames_txt(processing_filename, processed_filename)
-
-            except Exception as e:
-                print(f"Failed: {e}")
+            # except Exception as e:
+            #     print(f"Failed: {e}")
