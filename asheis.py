@@ -10,6 +10,7 @@ from astropy.visualization import ImageNormalize, quantity_support
 # from alpha_code import alpha, alpha_map
 import platform
 from eis_calib import eis_ea, eis_ea_nrl
+import re
 
 def load_plotting_routine():
     fig = plt.figure()
@@ -130,8 +131,9 @@ class asheis:
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
         if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
             print('---------------------Calibrating---------------------')
-            print(m.meta)
-            calib_ratio = eis_ea(float(m.meta['line_id'].split(' ')[-1]))/eis_ea_nrl(m.date.value, float(m.meta['line_id'].split(' ')[-1]))
+            wvl = re.search(r'\d+\.\d+', m.meta['line_id'])
+            print(wvl)
+            calib_ratio = eis_ea(float(wvl))/eis_ea_nrl(m.date.value, float(wvl))
             m = sunpy.map.Map(m.data*calib_ratio, m.meta)
         date = self.directory_setup(m,line,outdir) # Creating directories
         if plot == True: self.plot_map(date, m, line, outdir) # Plot maps
