@@ -261,7 +261,7 @@ if __name__ == "__main__":
     for filename_full in filenames:
         filename = filename_full.replace(" [processing]", '')
         # Check if the file has already been processed
-        if not filename.endswith("[processed]"):
+        if not filename.endswith("[processed]") or not filename.endswith("[processing]"):
             try:
             # Add "[processing]" to the end of the filename in filenames.txt
                 processing_filename = filename + " [processing]"
