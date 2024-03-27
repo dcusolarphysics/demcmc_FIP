@@ -134,6 +134,7 @@ class asheis:
             match = re.search(r'\d+\.\d+', m.meta['line_id'])
             wvl_value = float(match.group())
             calib_ratio = eis_ea(wvl_value)/eis_ea_nrl(m.date.value, wvl_value)
+            print(wvl_value)
             # calib_ratio = eis_ea(float(wvl))/eis_ea_nrl(m.date.value, float(wvl))
             m = sunpy.map.Map(m.data*calib_ratio, m.meta)
         date = self.directory_setup(m,line,outdir) # Creating directories
