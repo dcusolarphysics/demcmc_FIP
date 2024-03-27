@@ -129,6 +129,7 @@ class asheis:
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
         if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
+            print('---------------------Calibrating---------------------')
             calib_ratio = eis_ea(float(m.meta['line_id'].split(' ')[-1]))/eis_ea_nrl(m.date.value, float(m.meta['line_id'].split(' ')[-1]))
             m = sunpy.map.Map(m.data*calib_ratio, m.meta)
         date = self.directory_setup(m,line,outdir) # Creating directories
