@@ -258,13 +258,14 @@ if __name__ == "__main__":
     with open("config.txt", "r") as file:
         filenames = [line.strip() for line in file]
 
-    for filename in filenames:
+    for filename_full in filenames:
+        filename = filename_full.replace(" [processing]", '')
         # Check if the file has already been processed
         if not filename.endswith("[processed]"):
             # try:
             # Add "[processing]" to the end of the filename in filenames.txt
             processing_filename = filename + " [processing]"
-            update_filenames_txt(filename, processing_filename)
+            update_filenames_txt(filename_full, processing_filename)
             print(f"Processing: {filename}")
             np_file = process_data(filename, args.cores)
             print(f"Processed: {filename}")
@@ -276,7 +277,7 @@ if __name__ == "__main__":
 
             # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
             processed_filename = filename + " [processed]"
-            update_filenames_txt(processing_filename, processed_filename)
+            update_filenames_txt(filename_full, processed_filename)
 
             # except Exception as e:
             #     print(f"Failed: {e}")
