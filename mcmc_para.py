@@ -240,18 +240,18 @@ def update_filenames_txt(old_filename, new_filename):
 
 if __name__ == "__main__":
     # Determine the operating system type (Linux or macOS)
-    # Set the default number of processes based on the operating system
+    # Set the default number of cores based on the operating system
     if platform.system() == "Linux":
-        default_processes = 60  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+        default_cores = 60  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin":
-        default_processes = 10
+        default_cores = 10
     else:
-        default_processes = 10
+        default_cores = 10
 
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
-    parser.add_argument('-p', '--processes', type=int, default=default_processes,
-                        help='Number of processes to use (default: {})'.format(default_processes))
+    parser.add_argument('-c', '--cores', type=int, default=default_cores,
+                        help='Number of cores to use (default: {})'.format(default_cores))
     args = parser.parse_args()
 
     # Read filenames from a text file
@@ -266,7 +266,7 @@ if __name__ == "__main__":
                 processing_filename = filename + " [processing]"
                 update_filenames_txt(filename, processing_filename)
 
-                np_file = process_data(filename, args.processes)
+                np_file = process_data(filename, args.cores)
 
                 line_databases = {
                     "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],

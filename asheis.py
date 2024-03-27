@@ -9,7 +9,7 @@ from datetime import datetime
 from astropy.visualization import ImageNormalize, quantity_support
 # from alpha_code import alpha, alpha_map
 import platform
-
+from eis_calib import eis_ea, eis_ea_nrl
 
 def load_plotting_routine():
     fig = plt.figure()
@@ -125,13 +125,19 @@ class asheis:
         if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
         # plt.savefig(f'images/{amap.measurement.lower().split()[-1]}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
-    def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False):
+    def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=True):
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
+        if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
+            calib_ratio = eis_ea(float(m.meta['line_id'].split(' ')[-1]))/eis_ea_nrl(m.date.value, float(m.meta['line_id'].split(' ')[-1]))
+            m = sunpy.map.Map(m.data*calib_ratio, m.meta)
         date = self.directory_setup(m,line,outdir) # Creating directories
         if plot == True: self.plot_map(date, m, line, outdir) # Plot maps
         if mcmc:
-            m_error = fit_res.fit['err_int'][:,:,self.dict[f'{line}'][1]]
+            if calib:
+                m_error = fit_res.fit['err_int'][:,:,self.dict[f'{line}'][1]]*calib_ratio
+            else:  
+                m_error = fit_res.fit['err_int'][:,:,self.dict[f'{line}'][1]]
             return m.data, m_error
         else:
             return m
