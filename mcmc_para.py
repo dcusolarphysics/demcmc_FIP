@@ -138,43 +138,90 @@ def correct_metadata(map, ratio_name):
     map.meta['line_id'] = ratio_name
     return map
 
-def calc_composition(filename, np_file, line_database):
-    # I am tired and am probably very dumb in calculating this
-    from sunpy.map import Map
-    a = ashmcmc(filename)
+def calc_composition_parallel(args):
+    ypix, xpix, ldens, dem_median, intensities, line_databases, comp_ratio, a = args
+    logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix])
+    logt_interp = interp_emis_temp(logt.value)
+    temp_bins = TempBins(logt_interp * u.K)
+    emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2])
+    int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_median[ypix, xpix])
+    dem_scaled = dem_median[ypix, xpix] * (intensities[ypix, xpix, 0] / int_lf)
+    int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][1], dem_scaled)
+    fip_ratio = int_hf / intensities[ypix, xpix, 1]
+    return ypix, xpix, fip_ratio
 
+def calc_composition(filename, np_file, line_databases):
+    from sunpy.map import Map
+    from multiprocessing import Pool
+
+    a = ashmcmc(filename)
     ldens = a.read_density()
     dem_data = np.load(np_file)
     dem_median = dem_data['dem_combined']
 
-    # Retrieve necessary data from ashmcmc object
     for comp_ratio in line_databases:
         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
-        composition = np.zeros_like(ldens)  # Initialize composition array
+        composition = np.zeros_like(ldens)
 
-        for num, fip_line in enumerate(line_databases[comp_ratio][:2]):  # Iterate only over the first 2 lines
+        for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
             intensities[:, :, num] = map.data
 
-        print(f'------------------------------Calculating {line_databases[comp_ratio][2]} FIP Bias------------------------------')
-        for ypix, xpix in tqdm(np.ndindex(ldens.shape)):  # Iterate over each pixel
-            logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
-            logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
-            temp_bins = TempBins(logt_interp * u.K) # Create temp_bin structure for intensity prediction
-            emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2]) # Filter emissivity based on specified lines
-            dem_pixel = dem_median[ypix, xpix,:] # Extract DEM for the pixel
-            int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_pixel)
-            dem_scaled = dem_pixel * (intensities[ypix, xpix, 0] / int_lf)
-            int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][1], dem_scaled)
-            fip_ratio = int_hf/intensities[ypix, xpix, 1]
-            composition[ypix, xpix] = fip_ratio  # Update composition matrix
+        # Create argument list for parallel processing
+        args_list = [(ypix, xpix, ldens, dem_median, intensities, line_databases, comp_ratio, a)
+                     for ypix, xpix in np.ndindex(ldens.shape)]
 
-        np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
+        # Create a pool of worker processes
+        with Pool() as pool:
+            results = pool.map(calc_composition_parallel, args_list)
 
-        # Create SunPy Map with appropriate metadata
+        # Update composition array with the results
+        for ypix, xpix, fip_ratio in results:
+            composition[ypix, xpix] = fip_ratio
+
+        np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz',
+                 composition=composition, chi2=dem_data['chi2_combined'], no_lines=dem_data['lines_used'])
+
         map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio)
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits')
+# def calc_composition(filename, np_file, line_database):
+#     # I am tired and am probably very dumb in calculating this
+#     from sunpy.map import Map
+#     a = ashmcmc(filename)
+
+#     ldens = a.read_density()
+#     dem_data = np.load(np_file)
+#     dem_median = dem_data['dem_combined']
+
+#     # Retrieve necessary data from ashmcmc object
+#     for comp_ratio in line_databases:
+#         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
+#         composition = np.zeros_like(ldens)  # Initialize composition array
+
+#         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):  # Iterate only over the first 2 lines
+#             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
+#             intensities[:, :, num] = map.data
+
+#         print(f'------------------------------Calculating {line_databases[comp_ratio][2]} FIP Bias------------------------------')
+#         for ypix, xpix in tqdm(np.ndindex(ldens.shape)):  # Iterate over each pixel
+#             logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
+#             logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
+#             temp_bins = TempBins(logt_interp * u.K) # Create temp_bin structure for intensity prediction
+#             emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2]) # Filter emissivity based on specified lines
+#             dem_pixel = dem_median[ypix, xpix,:] # Extract DEM for the pixel
+#             int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_pixel)
+#             dem_scaled = dem_pixel * (intensities[ypix, xpix, 0] / int_lf)
+#             int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][1], dem_scaled)
+#             fip_ratio = int_hf/intensities[ypix, xpix, 1]
+#             composition[ypix, xpix] = fip_ratio  # Update composition matrix
+
+#         np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
+
+#         # Create SunPy Map with appropriate metadata
+#         map_fip = Map(composition, map.meta)
+#         map_fip = correct_metadata(map_fip, comp_ratio)
+#         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits')
 
 # def calc_composition(filename, np_file, line_database):
 #     from sunpy.map import Map
