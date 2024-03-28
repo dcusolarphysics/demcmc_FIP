@@ -169,12 +169,12 @@ def calc_composition(filename, np_file, line_database):
             fip_ratio = int_hf/intensities[ypix, xpix, 1]
             composition[ypix, xpix] = fip_ratio  # Update composition matrix
 
-        np.savez(f'{a.outdir}/{a.outdir}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
+        np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
 
         # Create SunPy Map with appropriate metadata
         map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio)
-        map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio}.fits')
+        map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits')
 
 # def calc_composition(filename, np_file, line_database):
 #     from sunpy.map import Map
