@@ -117,9 +117,9 @@ def process_data(filename: str, num_processes: int) -> None:
     # Combine the DEM files into a single array
     print('------------------------------Combining DEM files------------------------------')
     dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
-    np.savez(f'{a.outdir}/{a.outdir}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, lines_used=lines_used, logt=logt)
-
-    return f'{a.outdir}/{a.outdir}_dem_combined.npz'
+    np.savez(f'{a.outdir}/{a.outdir.split('/')[-1]}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, lines_used=lines_used, logt=logt)
+    
+    return f'{a.outdir}/{a.outdir.split('/')[-1]}_dem_combined.npz'
 
 def pred_intensity_compact(emis:np.array, logt:np.array, linename:str, dem:np.array) -> float:
     mcmc_emis = ContFuncDiscrete(logt*u.K, interp_emis_temp(emis) * u.cm ** 5 / u.K,
