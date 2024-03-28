@@ -258,9 +258,15 @@ if __name__ == "__main__":
     with open("config.txt", "r") as file:
         filenames = [line.strip() for line in file]
 
-    for filename_full in filenames:
+    for file_num, filename_full in enumerate(filenames):
         filename = filename_full.replace(" [processing]", '')
         # Check if the file has already been processed
+
+        # Re-read the config.txt file to get the latest information
+        with open("config.txt", "r") as file:
+            current_filenames = [line.strip() for line in file]
+
+        filename_full = current_filenames[file_num]
         if not filename_full.endswith("[processed]") and not filename_full.endswith("[processing]"):
             try:
             # Add "[processing]" to the end of the filename in filenames.txt
