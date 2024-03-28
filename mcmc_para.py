@@ -150,7 +150,7 @@ def calc_composition_parallel(args):
     fip_ratio = int_hf / intensities[ypix, xpix, 1]
     return ypix, xpix, fip_ratio
 
-def calc_composition(filename, np_file, line_databases):
+def calc_composition(filename, np_file, line_databases, num_processes):
     from sunpy.map import Map
     from multiprocessing import Pool
 
@@ -172,7 +172,7 @@ def calc_composition(filename, np_file, line_databases):
                      for ypix, xpix in np.ndindex(ldens.shape)]
 
         # Create a pool of worker processes
-        with Pool(processes=15) as pool:
+        with Pool(processes=num_processes) as pool:
             results = pool.map(calc_composition_parallel, args_list)
 
         # Update composition array with the results
@@ -326,7 +326,7 @@ if __name__ == "__main__":
                     "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
                     "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
                 }
-                calc_composition(filename, np_file, line_databases)
+                calc_composition(filename, np_file, line_databases, args.cores)
 
                 # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
                 processed_filename = filename + " [processed]"
