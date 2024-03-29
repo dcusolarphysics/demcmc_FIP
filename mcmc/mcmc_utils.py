@@ -21,10 +21,11 @@ def calc_chi2(mcmc_lines: list[EmissionLine], dem_result: np.array, temp_bins: T
 def mcmc_process(mcmc_lines: list[EmissionLine], temp_bins: TempBins) -> np.ndarray:
     # Perform MCMC process for the given MCMC lines and temperature bins
     dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=300, progress=False, dem_guess=None)
-    dem_init = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())], axis=0)
-    dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=1000, progress=False,
-                                    dem_guess=dem_init)
-    dem_median = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())],
-                            axis=0)
+    dem_median = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())], axis=0)
+    for nstep in [300, 500]:
+        dem_result = predict_dem_emcee(mcmc_lines, temp_bins, nwalkers=200, nsteps=nstep, progress=False,
+                                        dem_guess=dem_median)
+        dem_median = np.median([sample.values.value for num, sample in enumerate(dem_result.iter_binned_dems())],
+                                axis=0)
 
     return dem_median
