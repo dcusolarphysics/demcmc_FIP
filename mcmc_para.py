@@ -15,7 +15,7 @@ from demcmc import (
     ContFuncDiscrete,
 )
 from demcmc.units import u_temp, u_dem
-from mcmc_utils import calc_chi2, mcmc_process
+from mcmc.mcmc_utils import calc_chi2, mcmc_process
 
 
 def check_dem_exists(filename: str) -> bool:
