@@ -1,16 +1,16 @@
 # a lot of information are gathered through Will Barnes Hinode-14 sunpy tutorial - It will be a good manor to cite the sunpy team
 
 from pathlib import Path
+import re
 import eispac
 import sunpy
 from matplotlib import colors
 import matplotlib.pyplot as plt
 from datetime import datetime
-from astropy.visualization import ImageNormalize, quantity_support
 # from alpha_code import alpha, alpha_map
 import platform
-from eis_calib import eis_ea, eis_ea_nrl
-import re
+from astropy.visualization import ImageNormalize, quantity_support
+from eis_calibration.eis_calib import eis_ea, eis_ea_nrl
 
 def load_plotting_routine():
     fig = plt.figure()
@@ -91,7 +91,7 @@ class asheis:
             if template_name != 'fe_13_203_826.2c.template.h5':
                 template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
             else:
-                template = eispac.read_template('my_Fe_XIII_template-3c.h5')
+                template = eispac.read_template('eis_density/my_Fe_XIII_template-3c.h5')
             cube = eispac.read_cube(self.filename, window=template.central_wave)
             if self.rebin != False:
                 print('Rebinning')

@@ -1,10 +1,7 @@
 from demcmc import (
     EmissionLine,
     TempBins,
-    load_cont_funcs,
-    plot_emission_loci,
     predict_dem_emcee,
-    ContFuncDiscrete,
 )
 import numpy as np
 
