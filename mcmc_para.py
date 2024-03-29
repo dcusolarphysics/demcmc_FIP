@@ -330,7 +330,7 @@ if __name__ == "__main__":
 
             # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
             processed_filename = filename + " [processed]"
-            update_filenames_txt(filename_full, processed_filename)
+            update_filenames_txt(processing_filename, processed_filename)
 
             # except Exception as e:
             #     print(f"Failed: {e}")
