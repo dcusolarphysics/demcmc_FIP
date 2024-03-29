@@ -28,7 +28,7 @@ def read_calib_file():
     from scipy.io import readsav
 
     # Read the calibration file
-    calib_file = readsav('eis_calib_warren_2014.sav')
+    calib_file = readsav('eis_calibration/eis_calib_warren_2014.sav')
     return calib_file['eis']
 
 def eis_get_band(wave):
@@ -130,9 +130,9 @@ def eis_ea(input_wave, short=False, long=False):
 
 def eis_effective_area_read(short=False, long=False):
     if short:
-        preflight = readsav('preflight_calib_short.sav')
+        preflight = readsav('eis_calibration/preflight_calib_short.sav')
     if long:
-        preflight = readsav('preflight_calib_long.sav')
+        preflight = readsav('eis_calibration/preflight_calib_long.sav')
     wave = preflight['wave']
     ea = preflight['ea']
     return wave, ea
