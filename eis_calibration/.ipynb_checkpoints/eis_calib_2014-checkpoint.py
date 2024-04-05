@@ -1,7 +1,8 @@
 from datetime import datetime
 import numpy as np
 from scipy.io import readsav
-from scipy.interpolate import splrep, splev
+# from scipy.interpolate import splrep, splev
+from scipy.interpolate import interp1d
 
 
 def get_time_tai(date_string):
@@ -48,10 +49,11 @@ def eis_get_band(wave):
 
     return band
 
+from scipy.interpolate import interp1d
+
 def eis_ea_nrl(date, wave, short=False, long=False):
     eis = read_calib_file()
     t = (get_time_tai(date) - get_time_tai(eis['t0'][0].decode('utf-8')))/(86400*365.25)
-
     ea_knots_SW = eis['a0_sw'][0]*np.exp(-t/eis['tau_sw'][0])
     ea_knots_LW = eis['a0_lw'][0]*np.exp(-t/eis['tau_lw'][0])
 
@@ -63,7 +65,7 @@ def eis_ea_nrl(date, wave, short=False, long=False):
         wave = eis['wave_area_lw'][0]
 
     # -----------------------------------------------------------------
-    # --- spline onto the input wavelength grid
+    # --- interpolate onto the input wavelength grid
     if isinstance(wave, (int, float)):
         wave = np.array([wave])
 
@@ -72,7 +74,6 @@ def eis_ea_nrl(date, wave, short=False, long=False):
 
     for i in range(nWave):
         band = eis_get_band(wave[i])
-
         if band == 'SW':
             w = eis['wave_knots_sw'][0]
             e = np.log(ea_knots_SW)
@@ -86,9 +87,8 @@ def eis_ea_nrl(date, wave, short=False, long=False):
             s = 0
 
         if s == 1:
-            tck = splrep(w, e)
-            ea_out[i] = np.exp(splev(wave[i], tck))
-            
+            interp_func = interp1d(w, e, kind='linear')
+            ea_out[i] = np.exp(interp_func(wave[i]))
         else:
             ea_out[i] = 0.0
 
@@ -96,7 +96,7 @@ def eis_ea_nrl(date, wave, short=False, long=False):
         ea_out = ea_out[0]
 
     return ea_out
-
+    
 def eis_ea(input_wave, short=False, long=False):
     if short:
         wave, ea = eis_effective_area_read(short=True)
@@ -163,3 +163,14 @@ def is_eis_wavelength(input_wave):
 
     # Return whether the input wavelength belongs to the short or long wavelength range
     return short, long
+
+
+def calib_2014(map):
+    import sunpy.map
+    import re
+    
+    match = re.search(r'\d+\.\d+', map.meta['line_id'])
+    wvl_value = float(match.group())
+    calib_ratio = eis_ea(wvl_value)/eis_ea_nrl(map.date.value, wvl_value)
+    new_map = sunpy.map.Map(map.data*calib_ratio, map.meta)
+    return new_map
