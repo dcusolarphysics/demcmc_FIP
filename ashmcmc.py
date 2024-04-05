@@ -52,7 +52,7 @@ class ashmcmc:
         # self.email = "andysh.to@esa.int"
         self.filename = filename
         self.ash = asheis(filename)
-        self.outdir = filename.split('/')[-1].replace('.data.h5', '')
+        self.outdir = 'results/'+filename.split('/')[-1].replace('.data.h5', '')
 
     # def fit_data_parallel(self, i):
     #     if i[:2] == 'fe':
