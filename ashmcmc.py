@@ -4,7 +4,16 @@ import os
 import re
 import numpy as np
 
-def find_matching_file(log_density, directory='/Users/andysh.to/Script/Data/emissivities_sun_photospheric_2015_scott/'):
+def find_matching_file(log_density, abund_file = 'emissivities_sun_photospheric_2015_scott'):
+    import platform
+
+    if platform.system() == 'Linux':
+        directory=f'/disk/solar17/st3/{abund_file}/'
+
+    if platform.system() == 'Darwin':
+        directory=f'/Users/andysh.to/Script/Data/{abund_file}/'
+
+    # Convert log_density to float
     target_log_density = float(log_density)
     
     matching_file = None
@@ -45,13 +54,13 @@ class ashmcmc:
         self.ash = asheis(filename)
         self.outdir = filename.split('/')[-1].replace('.data.h5', '')
 
-    def fit_data_parallel(self, i):
-        if i[:2] == 'fe':
-            print(i)
-            if self.ash.check_window(i) != None:  # Provide the 'line' argument
-                print('checked_window')
-                intensity = self.ash.get_intensity(i, outdir=self.outdir, mcmc=True, plot=False)
-                return i, intensity
+    # def fit_data_parallel(self, i):
+    #     if i[:2] == 'fe':
+    #         print(i)
+    #         if self.ash.check_window(i) != None:  # Provide the 'line' argument
+    #             print('checked_window')
+    #             intensity = self.ash.get_intensity(i, outdir=self.outdir, mcmc=True, plot=False)
+    #             return i, intensity
 
     def fit_data(self, **kwargs):
         from tqdm import tqdm
@@ -69,6 +78,7 @@ class ashmcmc:
 
         Intensities = np.zeros((int(dim[0]), int(dim[1]), dem_num))    
         Int_error = np.zeros((int(dim[0]), int(dim[1]), dem_num))    
+        print(f'------------------------------Found {dem_num} usable lines------------------------------')
         print(f'Found {dem_num} usable lines')
         for ind, line in tqdm(enumerate(Lines)):
             Intensities[:, :, ind], Int_error[:, :, ind] = self.ash.get_intensity(line, outdir=self.outdir, mcmc=True, **kwargs)
@@ -82,12 +92,12 @@ class ashmcmc:
 
         return ldens
     
-    def read_emissivity(self, ldens, abund = '/Users/andysh.to/Script/Data/emissivities_sun_photospheric_2015_scott/'):
+    def read_emissivity(self, ldens, abund_file = 'emissivities_sun_photospheric_2015_scott'):
         from scipy.io import readsav
         import astropy.units as u
         # Find matching file based on density
-        emis_file = readsav(find_matching_file(ldens, directory=abund))
-        print(find_matching_file(ldens, directory=abund))
+        emis_file = readsav(find_matching_file(ldens, abund_file=abund_file))
+         # print(find_matching_file(ldens, abund_file=abund_file))
         logt = 10**emis_file['logt_interpolated']*u.K
         emis = emis_file['emissivity_combined']
         linenames = emis_file['linenames'].astype(str)
@@ -103,10 +113,6 @@ class ashmcmc:
 
         return emis_sorted
     
-    # def mcmcdem(self)
-        
-
-
     
 if __name__ == "__main__":
     ash_mcmc = ashmcmc()
