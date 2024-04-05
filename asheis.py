@@ -10,7 +10,8 @@ from datetime import datetime
 # from alpha_code import alpha, alpha_map
 import platform
 from astropy.visualization import ImageNormalize, quantity_support
-from eis_calibration.eis_calib import eis_ea, eis_ea_nrl
+from eis_calibration.eis_calib_2014 import calib_2014
+from eis_calibration.eis_calib_2023 import calib_2023
 
 def load_plotting_routine():
     fig = plt.figure()
@@ -130,12 +131,8 @@ class asheis:
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
         if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
-            print('---------------------Calibrating---------------------')
-            match = re.search(r'\d+\.\d+', m.meta['line_id'])
-            wvl_value = float(match.group())
-            calib_ratio = eis_ea(wvl_value)/eis_ea_nrl(m.date.value, wvl_value)
-            # calib_ratio = eis_ea(float(wvl))/eis_ea_nrl(m.date.value, float(wvl))
-            m = sunpy.map.Map(m.data*calib_ratio, m.meta)
+            m, calib_ratio = calib_2023(m, ratio=True)
+            print(f'---------------------Calibrated using Del Zanna et al. 2023; Ratio: {calib_ratio}---------------------')
         date = self.directory_setup(m,line,outdir) # Creating directories
         if plot == True: self.plot_map(date, m, line, outdir) # Plot maps
         if mcmc:
