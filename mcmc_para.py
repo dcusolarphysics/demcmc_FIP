@@ -85,6 +85,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     from re import search
 
     dem_files = sorted(glob(f'{dir}/dem_columns/dem*.npz'))
+    print(dem_files)
     ref = np.load(dem_files[0])['dem_results'].shape
     logt = np.load(dem_files[0])['logt']
     dem_combined = np.zeros((ydim,xdim,ref[1]))
@@ -92,7 +93,9 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     lines_used = np.zeros((ydim,xdim))
 
     for dem_file in dem_files:
+        print(dem_file)
         xpix_loc = search(r'dem_(\d+)\.npz$', dem_file).group(1)
+        print(xpix_loc)
         dem_combined[:,int(xpix_loc), :] = np.load(dem_file)['dem_results'] 
         chi2_combined[:,int(xpix_loc)] = np.load(dem_file)['chi2'] 
         lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file, allow_pickle=True)['lines_used']])
