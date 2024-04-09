@@ -1,5 +1,6 @@
 from multiprocessing import Pool
 from functools import partial
+from time import sleep
 from tqdm import tqdm
 import numpy as np
 import astropy.units as u
@@ -167,6 +168,8 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         composition = np.zeros_like(ldens)
 
         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
+            sleep(5)
+            print('getting intensity \n')
             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
             intensities[:, :, num] = map.data
 
