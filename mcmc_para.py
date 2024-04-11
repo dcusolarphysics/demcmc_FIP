@@ -51,11 +51,11 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
             mcmc_lines = []
 
             for ind, line in enumerate(Lines):
-                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 10) and (line!='fe_10_184.54'):
+                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 30):
                     mcmc_emis = ContFuncDiscrete(logt_interp*u.K, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
                                                 name=line)
                     mcmc_intensity = Intensity[ypix, xpix, ind]
-                    mcmc_int_error = max(Int_error[ypix, xpix, ind], 0.25 * mcmc_intensity)
+                    mcmc_int_error = Int_error[ypix, xpix,ind]+Intensity[ypix, xpix,ind]*0.23
                     emissionLine = EmissionLine(
                         mcmc_emis,
                         intensity_obs=mcmc_intensity,

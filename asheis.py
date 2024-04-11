@@ -85,14 +85,16 @@ class asheis:
         from eispac.instr import ccd_offset
         template_name=self.dict[f'{line}'][0]
         # print(self.filename.replace("data.h5",template_name))
+        if template_name != 'fe_13_203_826.2c.template.h5':
+            template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
+        else:
+            template = eispac.read_template('eis_density/fe_13_203_830.3c.template.h5')
+            template_name = 'fe_13_203_830.3c.template.h5'
+
         path = Path(f'{self.filename}'.replace("data.h5",template_name).replace(".template",f"-{self.dict[f'{line}'][1]}.fit"))
         # if self rebin != False:
         print(path)
         if path.is_file() == False or refit==True or self.rebin!=False:
-            if template_name != 'fe_13_203_826.2c.template.h5':
-                template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
-            else:
-                template = eispac.read_template('eis_density/my_Fe_XIII_template-3c.h5')
             cube = eispac.read_cube(self.filename, window=template.central_wave)
             if self.rebin != False:
                 print('Rebinning')
@@ -106,6 +108,7 @@ class asheis:
             fit_res=eispac.read_fit(path)
 
         return fit_res
+    
     
     def directory_setup(self, amap, line, outdir):
         # Set up directory and save fit

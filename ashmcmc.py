@@ -39,7 +39,7 @@ def find_matching_file(log_density, abund_file = 'emissivities_sun_photospheric_
 def interp_emis_temp(original_array):
 
     # Interpolate into array with size 401
-    new_size = 70
+    new_size = 101
     new_indices = np.linspace(0, len(original_array) - 1, new_size)
     interpolated_array = np.interp(new_indices, np.arange(len(original_array)), original_array)
     return interpolated_array
@@ -85,10 +85,10 @@ class ashmcmc:
 
         return Lines, Intensities, Int_error
 
-    def read_density(self):
+    def read_density(self,calib=True, **kwargs):
         # Read density from asheis object
         # Returns an array of log densities
-        ldens = self.ash.get_density(outdir=self.outdir, mcmc=True)
+        ldens = self.ash.get_density(outdir=self.outdir, mcmc=True, calib=calib, **kwargs)
 
         return ldens
     
