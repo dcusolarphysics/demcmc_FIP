@@ -161,8 +161,8 @@ class asheis:
         date = self.directory_setup(m,line)
         if plot == True: self.plot_map(date, m, line, colorbar=True)
         return m
-
-    def get_density(self, outdir='', refit=False, plot=True, mcmc=False):
+    
+    def get_density(self, outdir='', refit=False, plot=True, mcmc=False, **kwargs):
         from scipy.io import readsav
         import numpy as np
         from astropy.visualization import ImageNormalize
@@ -171,8 +171,8 @@ class asheis:
         density_ratios = readsav(f'{self.dens_dir}/density_ratios_fe_13_203_82_202_04_.sav')['smooth_rat']
         density_values = readsav(f'{self.dens_dir}/density_ratios_fe_13_203_82_202_04_.sav')['smooth_den']
 
-        m_nom = self.get_intensity('fe_13_203.83', outdir, plot=False)
-        m_denom = self.get_intensity('fe_13_202.04', outdir, plot=False)
+        m_nom = self.get_intensity('fe_13_203.83', outdir, plot=False, **kwargs)
+        m_denom = self.get_intensity('fe_13_202.04', outdir, plot=False, **kwargs)
         obs_ratio = m_nom.data / m_denom.data
 
         for i in range(obs_ratio.shape[0]):
@@ -190,6 +190,7 @@ class asheis:
             return m.data
         else:
             return m
+
 
 
     def get_composition(self, linepair, outdir='', vmin=0, vmax=4, **kwargs):
