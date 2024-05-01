@@ -79,7 +79,7 @@ class ashmcmc:
         Intensities = np.zeros((int(dim[0]), int(dim[1]), dem_num))    
         Int_error = np.zeros((int(dim[0]), int(dim[1]), dem_num))    
         print(f'------------------------------Found {dem_num} usable lines------------------------------')
-        print(f'Found {dem_num} usable lines')
+        print(f'Found {dem_num} usable lines for DEM')
         for ind, line in tqdm(enumerate(Lines)):
             Intensities[:, :, ind], Int_error[:, :, ind] = self.ash.get_intensity(line, outdir=self.outdir, mcmc=True, **kwargs)
 

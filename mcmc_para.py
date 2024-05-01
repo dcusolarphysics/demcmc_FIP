@@ -146,7 +146,6 @@ def calc_composition_parallel(args):
     ypix, xpix, ldens, dem_median, intensities, line_databases, comp_ratio, a = args
     logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix])
     logt_interp = interp_emis_temp(logt.value)
-    temp_bins = TempBins(logt_interp * u.K)
     emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2])
     int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_median[ypix, xpix])
     dem_scaled = dem_median[ypix, xpix] * (intensities[ypix, xpix, 0] / int_lf)
@@ -167,10 +166,10 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
         composition = np.zeros_like(ldens)
 
+        # Read the intensity maps for the composition lines
         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
-            sleep(5)
             print('getting intensity \n')
-            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
+            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False, calib=True)
             intensities[:, :, num] = map.data
 
         # Create argument list for parallel processing
@@ -330,7 +329,7 @@ if __name__ == "__main__":
             print(f"Processed: {filename}")
             line_databases = {
                 "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
-                # "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
+                "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
             }
             calc_composition(filename, np_file, line_databases, args.cores)
 
