@@ -280,10 +280,10 @@ def calc_composition(filename, np_file, line_databases, num_processes):
 import os
 
 def update_filenames_txt(old_filename, new_filename):
-    with open("config.txt", "r") as file:
+    with open("demcmc_FIP/config.txt", "r") as file:
         lines = file.readlines()
 
-    with open("config.txt", "w") as file:
+    with open("demcmc_FIP/config.txt", "w") as file:
         for line in lines:
             if line.strip() == old_filename:
                 file.write(new_filename + "\n")
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Read filenames from a text file
-    with open("config.txt", "r") as file:
+    with open("demcmc_FIP/config.txt", "r") as file:
         filenames = [line.strip() for line in file]
 
     for file_num, filename_full in enumerate(filenames):
@@ -315,7 +315,7 @@ if __name__ == "__main__":
         # Check if the file has already been processed
 
         # Re-read the config.txt file to get the latest information
-        with open("config.txt", "r") as file:
+        with open("demcmc_FIP/config.txt", "r") as file:
             current_filenames = [line.strip() for line in file]
 
         filename_full = current_filenames[file_num]
