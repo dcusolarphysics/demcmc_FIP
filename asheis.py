@@ -88,7 +88,7 @@ class asheis:
         if template_name != 'fe_13_203_826.2c.template.h5':
             template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
         else:
-            template = eispac.read_template('eis_density/fe_13_203_830.3c.template.h5')
+            template = eispac.read_template('demcmc_FIP/eis_density/fe_13_203_830.3c.template.h5')
             template_name = 'fe_13_203_830.3c.template.h5'
 
         path = Path(f'{self.filename}'.replace("data.h5",template_name).replace(".template",f"-{self.dict[f'{line}'][1]}.fit"))
