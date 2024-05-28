@@ -69,9 +69,9 @@ class asheis:
         self.ncpu = ncpu
         self.rebin = rebin
         if platform.system() == "Linux":
-            self.dens_dir = '/disk/solar17/st3/density'
+            self.dens_dir = '/home/staff/daithil/work/python_output/FIP/density'
         elif platform.system() == "Darwin":
-            self.dens_dir = '/Users/andysh.to/Script/idl_code/density'
+            self.dens_dir = '/Users/dml/python_output/FIP/density'
 
 
     def check_window(self, line):
@@ -134,8 +134,8 @@ class asheis:
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
         if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
-            m, calib_ratio = calib_2023(m, ratio=True)
-            print(f'---------------------Calibrated using Del Zanna et al. 2023; Ratio: {calib_ratio}---------------------')
+            m, calib_ratio = calib_2014(m, ratio=True)
+            print(f'---------------------Calibrated using Warren et al. 2014; Ratio: {calib_ratio}---------------------')
         date = self.directory_setup(m,line,outdir) # Creating directories
         if plot == True: self.plot_map(date, m, line, outdir) # Plot maps
         if mcmc:
