@@ -1,4 +1,4 @@
-from asheis import asheis
+from demcmc_FIP.asheis import asheis
 from multiprocessing import Pool
 import os
 import re
