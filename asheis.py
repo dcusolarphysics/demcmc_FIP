@@ -168,8 +168,8 @@ class asheis:
         from astropy.visualization import ImageNormalize
         import astropy.units as u
 
-        density_ratios = readsav(f'{self.dens_dir}/density_ratios_fe_13_203_82_202_04_.sav')['smooth_rat']
-        density_values = readsav(f'{self.dens_dir}/density_ratios_fe_13_203_82_202_04_.sav')['smooth_den']
+        density_ratios = readsav(f'{self.dens_dir}/density_ratios_fe_13_203_82_202_04_from_IDL.sav')['smooth_rat']
+        density_values = readsav(f'{self.dens_dir}/density_ratios_fe_13_203_82_202_04_from_IDL.sav')['smooth_den']
 
         m_nom = self.get_intensity('fe_13_203.83', outdir, plot=False, **kwargs)
         m_denom = self.get_intensity('fe_13_202.04', outdir, plot=False, **kwargs)
