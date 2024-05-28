@@ -10,8 +10,8 @@ from datetime import datetime
 # from alpha_code import alpha, alpha_map
 import platform
 from astropy.visualization import ImageNormalize, quantity_support
-from eis_calibration.eis_calib_2014 import calib_2014
-from eis_calibration.eis_calib_2023 import calib_2023
+from demcmc_FIP.eis_calibration.eis_calib_2014 import calib_2014
+from demcmc_FIP.eis_calibration.eis_calib_2023 import calib_2023
 
 def load_plotting_routine():
     fig = plt.figure()
