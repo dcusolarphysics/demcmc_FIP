@@ -156,6 +156,7 @@ def calc_composition_parallel(args):
 def calc_composition(filename, np_file, line_databases, num_processes):
     from sunpy.map import Map
     from multiprocessing import Pool
+    from matplotlib import colors
 
     a = ashmcmc(filename)
     ldens = a.read_density()
@@ -169,7 +170,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         # Read the intensity maps for the composition lines
         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
             print('getting intensity \n')
-            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False, calib=True)
+            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=True)
             intensities[:, :, num] = map.data
 
         # Create argument list for parallel processing
@@ -190,7 +191,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio)
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits', overwrite=True)
-        map_fip.plot(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.png', overwrite=True)
+        a.ash.plot_map(map_fip.date, map_fip, comp_ratio, a.outdir, vmin=0, vmax=4, norm=colors.Normalize(), cmap='CMRmap')
 # def calc_composition(filename, np_file, line_database):
 #     # I am tired and am probably very dumb in calculating this
 #     from sunpy.map import Map
