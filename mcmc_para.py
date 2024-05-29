@@ -294,7 +294,7 @@ if __name__ == "__main__":
     # Determine the operating system type (Linux or macOS)
     # Set the default number of cores based on the operating system
     if platform.system() == "Linux":
-        default_cores = 60  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+        default_cores = 128  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin":
         default_cores = 10
     else:
@@ -329,7 +329,7 @@ if __name__ == "__main__":
             print(f"Processed: {filename}")
             line_databases = {
                 "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
-                "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
+#                "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
             }
             calc_composition(filename, np_file, line_databases, args.cores)
 
