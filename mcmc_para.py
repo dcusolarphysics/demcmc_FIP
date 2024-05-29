@@ -193,7 +193,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio)
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits', overwrite=True)
-        a.ash.plot_fip_map(a.outdir.split("/")[-1], map_fip, comp_ratio, a.outdir)
+        a.ash.plot_fip_map(a.outdir.split("/")[-1], map_fip, a.outdir)
 # def calc_composition(filename, np_file, line_database):
 #     # I am tired and am probably very dumb in calculating this
 #     from sunpy.map import Map
