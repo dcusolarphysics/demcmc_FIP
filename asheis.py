@@ -127,7 +127,8 @@ class asheis:
         if colorbar==True: plt.colorbar() 
         load_axes_labels()
         # plt.savefig(f'{date}/eis_{m.measurement.lower().replace(" ","_").replace(".","_")}.png')
-        if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
+#        if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
+        if savefig==True: plt.savefig(f'{outdir}/images/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
         # plt.savefig(f'images/{amap.measurement.lower().split()[-1]}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
     def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=True):
