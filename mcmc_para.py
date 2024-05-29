@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('ignore')
+
 from multiprocessing import Pool
 from functools import partial
 from time import sleep
@@ -156,7 +159,6 @@ def calc_composition_parallel(args):
 def calc_composition(filename, np_file, line_databases, num_processes):
     from sunpy.map import Map
     from multiprocessing import Pool
-    from matplotlib import colors
 
     a = ashmcmc(filename)
     ldens = a.read_density()
@@ -191,7 +193,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio)
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits', overwrite=True)
-        a.ash.plot_fip_map(a.outdir.split("/")[-1], map_fip, comp_ratio, a.outdir, vmin=0, vmax=4, norm=colors.Normalize(), cmap='CMRmap')
+        a.ash.plot_fip_map(a.outdir.split("/")[-1], map_fip, comp_ratio, a.outdir)
 # def calc_composition(filename, np_file, line_database):
 #     # I am tired and am probably very dumb in calculating this
 #     from sunpy.map import Map

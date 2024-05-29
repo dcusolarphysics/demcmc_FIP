@@ -130,12 +130,11 @@ class asheis:
         if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
         # plt.savefig(f'images/{amap.measurement.lower().split()[-1]}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
-    def plot_fip_map(self, date, amap, outdir, colorbar=True, savefig=True, **kwargs):
+    def plot_fip_map(self, date, amap, outdir, colorbar=True, savefig=True):
         load_plotting_routine()
         norm = colors.Normalize(vmin=0, vmax=4)
         amap.plot_settings['norm'] = norm
         amap.plot_settings['cmap'] = 'RdYlBu'
-        amap.plot(**kwargs)
 
         if colorbar==True: plt.colorbar() 
         load_axes_labels()
