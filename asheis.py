@@ -121,15 +121,25 @@ class asheis:
         amap.save(f"{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{'_'.join(amap.measurement.lower().split())}.fits", overwrite=True)
         return date
     
-    def plot_map(self, date, amap, line, outdir, colorbar=False, savefig=True, **kwargs):
+    def plot_int_map(self, date, amap, line, outdir, colorbar=False, savefig=True, **kwargs):
         load_plotting_routine()
         amap.plot(**kwargs)
         if colorbar==True: plt.colorbar() 
         load_axes_labels()
         # plt.savefig(f'{date}/eis_{m.measurement.lower().replace(" ","_").replace(".","_")}.png')
-#        if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
-        if savefig==True: plt.savefig(f'{outdir}/images/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
+        if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
         # plt.savefig(f'images/{amap.measurement.lower().split()[-1]}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
+
+    def plot_fip_map(self, date, amap, outdir, colorbar=True, savefig=True, **kwargs):
+        load_plotting_routine()
+        norm = colors.Normalize(vmin=0, vmax=4)
+        amap.plot_settings['norm'] = norm
+        amap.plot_settings['cmap'] = 'RdYlBu'
+        amap.plot(**kwargs)
+
+        if colorbar==True: plt.colorbar() 
+        load_axes_labels()
+        if savefig==True: plt.savefig(f'{outdir}/images/{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
     def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=True):
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
@@ -138,7 +148,7 @@ class asheis:
             m, calib_ratio = calib_2014(m, ratio=True)
             print(f'---------------------Calibrated using Warren et al. 2014; Ratio: {calib_ratio}---------------------')
         date = self.directory_setup(m,line,outdir) # Creating directories
-        if plot == True: self.plot_map(date, m, line, outdir) # Plot maps
+        if plot == True: self.plot_int_map(date, m, line, outdir) # Plot maps
         if mcmc:
             if calib:
                 m_error = fit_res.fit['err_int'][:,:,self.dict[f'{line}'][1]]*calib_ratio
@@ -153,14 +163,14 @@ class asheis:
         m = fit_res.get_map(component = self.dict[f'{line}'][1],measurement='velocity')
         date = self.directory_setup(m,line,outdir)
         m.plot_settings['norm'] = ImageNormalize(vmin=vmin,vmax=vmax) # adjusting the velocity saturation
-        if plot == True: self.plot_map(date, m, line, colorbar=True)
+        if plot == True: self.plot_int_map(date, m, line, colorbar=True)
         return m
         
     def get_width(self, line, outdir='', refit=False, plot=True):
         fit_res = self.fit_data(line,'vel', outdir)
         m = fit_res.get_map(component = self.dict[f'{line}'][1],measurement='width')
         date = self.directory_setup(m,line)
-        if plot == True: self.plot_map(date, m, line, colorbar=True)
+        if plot == True: self.plot_int_map(date, m, line, colorbar=True)
         return m
     
     def get_density(self, outdir='', refit=False, plot=True, mcmc=False, **kwargs):
@@ -226,7 +236,7 @@ class asheis:
         date = self.directory_setup(m_fip, lines[2])
         
         # m_fip.save(f"images/{m_fip.measurement.lower().split()[-1]}/{lines[2]}/eis_{date}_{'_'.join(m_fip.measurement.lower().split())}.fits", overwrite=True)
-        self.plot_map(date, m_fip, lines[2], outdir, vmin=vmin, vmax=vmax, norm=colors.Normalize(), cmap='CMRmap')
+        self.plot_fip_map(date, m_fip, outdir, vmin=vmin, vmax=vmax, norm=colors.Normalize(), cmap='CMRmap')
         
 if __name__ == '__main__':
     load_plotting_routine()
