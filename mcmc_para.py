@@ -111,7 +111,7 @@ def process_data(filename: str, num_processes: int) -> None:
     a = ashmcmc(filename)
 
     # Retrieve necessary data from ashmcmc object
-    Lines, Intensity, Int_error = a.fit_data(plot=False)
+    Lines, Intensity, Int_error = a.fit_data(plot=True)
     ldens = a.read_density()
 
     # Generate a list of arguments for process_pixel function
@@ -194,92 +194,6 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         map_fip = correct_metadata(map_fip, comp_ratio)
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits', overwrite=True)
         a.ash.plot_fip_map(a.outdir.split("/")[-1], map_fip, a.outdir)
-# def calc_composition(filename, np_file, line_database):
-#     # I am tired and am probably very dumb in calculating this
-#     from sunpy.map import Map
-#     a = ashmcmc(filename)
-
-#     ldens = a.read_density()
-#     dem_data = np.load(np_file)
-#     dem_median = dem_data['dem_combined']
-
-#     # Retrieve necessary data from ashmcmc object
-#     for comp_ratio in line_databases:
-#         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
-#         composition = np.zeros_like(ldens)  # Initialize composition array
-
-#         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):  # Iterate only over the first 2 lines
-#             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
-#             intensities[:, :, num] = map.data
-
-#         print(f'------------------------------Calculating {line_databases[comp_ratio][2]} FIP Bias------------------------------')
-#         for ypix, xpix in tqdm(np.ndindex(ldens.shape)):  # Iterate over each pixel
-#             logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
-#             logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
-#             temp_bins = TempBins(logt_interp * u.K) # Create temp_bin structure for intensity prediction
-#             emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2]) # Filter emissivity based on specified lines
-#             dem_pixel = dem_median[ypix, xpix,:] # Extract DEM for the pixel
-#             int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_pixel)
-#             dem_scaled = dem_pixel * (intensities[ypix, xpix, 0] / int_lf)
-#             int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][1], dem_scaled)
-#             fip_ratio = int_hf/intensities[ypix, xpix, 1]
-#             composition[ypix, xpix] = fip_ratio  # Update composition matrix
-
-#         np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
-
-#         # Create SunPy Map with appropriate metadata
-#         map_fip = Map(composition, map.meta)
-#         map_fip = correct_metadata(map_fip, comp_ratio)
-#         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits')
-
-# def calc_composition(filename, np_file, line_database):
-#     from sunpy.map import Map
-#     from multiprocessing import Pool
-#     import platform
-
-#     a = ashmcmc(filename)
-
-#     ldens = a.read_density()
-#     dem_data = np.load(np_file)
-#     dem_median = dem_data['dem_combined']
-
-#     # Retrieve necessary data from ashmcmc object
-#     for comp_ratio in line_databases:
-#         intensities = np.zeros((ldens.shape[0], ldens.shape[1], 2))
-#         composition = np.zeros_like(ldens)  # Initialize composition array
-
-#         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):  # Iterate only over the first 2 lines
-#             map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=False)
-#             intensities[:, :, num] = map.data
-
-#         def calc_composition_pixel(ypix, xpix):
-#             logt, emis, linenames = a.read_emissivity(ldens[ypix, xpix]) # Read emissivity from .sav files
-#             logt_interp = interp_emis_temp(logt.value) # Interpolate the temperature
-#             temp_bins = TempBins(logt_interp * u.K) # Create temp_bin structure for intensity prediction
-#             emis_sorted = a.emis_filter(emis, linenames, line_databases[comp_ratio][:2]) # Filter emissivity based on specified lines
-
-#             int_lf = pred_intensity_compact(emis_sorted[0], logt_interp, line_databases[comp_ratio][0], dem_median[ypix, xpix])
-#             dem_scaled = dem_median[ypix, xpix] * (intensities[ypix, xpix, 0] / int_lf)
-#             int_hf = pred_intensity_compact(emis_sorted[1], logt_interp, line_databases[comp_ratio][1], dem_scaled)
-#             fip_ratio = int_hf/intensities[ypix, xpix, 1]
-#             return fip_ratio
-
-#         # Determine the operating system type (Linux or macOS)
-#         # Set the number of processes based on the operating system
-#         if platform.system() == "Linux": process_num = 60 # above 64 seems to break the MSSL machine
-#         elif platform.system() == "Darwin": process_num = 10
-#         else: process_num = 10 
-
-#         with Pool(processes=process_num) as pool:
-#             results = list(tqdm(pool.starmap(calc_composition_pixel, [(ypix, xpix) for ypix, xpix in np.ndindex(ldens.shape)]), total=ldens.size, desc="Processing Pixels"))
-#             composition = np.array(results).reshape(ldens.shape)
-
-#         np.savez(f'{a.outdir}/{a.outdir}_composition_{comp_ratio}.npz', composition=composition, chi2 =  dem_data['chi2_combined'], no_lines = dem_data['lines_used'])
-
-#         # Create SunPy Map with appropriate metadata
-#         map_fip = Map(composition, map.meta)
-#         map_fip = correct_metadata(map_fip, comp_ratio)
-#         map_fip.save(f'{a.outdir}/{a.outdir}_{comp_ratio}.fits')
 
 import os
 
@@ -298,11 +212,11 @@ if __name__ == "__main__":
     # Determine the operating system type (Linux or macOS)
     # Set the default number of cores based on the operating system
     if platform.system() == "Linux":
-        default_cores = 128  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+        default_cores = len(os.sched_getaffinity(0))  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin":
-        default_cores = 10
+        default_cores = len(os.sched_getaffinity(0))
     else:
-        default_cores = 10
+        default_cores = len(os.sched_getaffinity(0))
 
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
