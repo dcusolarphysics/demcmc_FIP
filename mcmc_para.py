@@ -22,7 +22,7 @@ from demcmc_FIP.demcmc import (
 )
 from demcmc_FIP.demcmc.units import u_temp, u_dem
 from demcmc_FIP.mcmc.mcmc_utils import calc_chi2, mcmc_process
-
+import configparser
 
 def check_dem_exists(filename: str) -> bool:
     # Check if the DEM file exists
@@ -84,12 +84,18 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
 
 def download_data(filename: str) -> None:
     from eispac.download import download_hdf5_data
-    if platform.system() == 'Linux':
-#        local_top=f'/home/staff/daithil/work/Data/EIS'
-        local_top=f'/disk/solar14/dml/Data/EIS'
 
-    if platform.system() == 'Darwin':
-        local_top=f'/Users/dml/Data/EIS'
+    config_obj = configparser.ConfigParser()
+    config_obj.read("demcmc_FIP/configfile.ini")
+    directories = config_obj["directories"]
+    local_top = directories['local_top']
+
+#    if platform.system() == 'Linux':
+##        local_top=f'/home/staff/daithil/work/Data/EIS'
+#        local_top=f'/disk/solar14/dml/Data/EIS'
+#
+#    if platform.system() == 'Darwin':
+#        local_top=f'/Users/dml/Data/EIS'
 
     download_hdf5_data(filename.split('/')[-1], local_top=local_top, overwrite=False)
 
@@ -207,10 +213,10 @@ def calc_composition(filename, np_file, line_databases, num_processes):
 import os
 
 def update_filenames_txt(old_filename, new_filename):
-    with open("demcmc_FIP/config.txt", "r") as file:
+    with open("demcmc_FIP/filelist.txt", "r") as file:
         lines = file.readlines()
 
-    with open("demcmc_FIP/config.txt", "w") as file:
+    with open("demcmc_FIP/filelist.txt", "w") as file:
         for line in lines:
             if line.strip() == old_filename:
                 file.write(new_filename + "\n")
@@ -223,7 +229,7 @@ if __name__ == "__main__":
     if platform.system() == "Linux":
         default_cores = len(os.sched_getaffinity(0))  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin":
-        default_cores = len(os.sched_getaffinity(0))
+        default_cores = 8
     else:
         default_cores = len(os.sched_getaffinity(0))
 
@@ -234,21 +240,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Read filenames from a text file
-    with open("demcmc_FIP/config.txt", "r") as file:
+    with open("demcmc_FIP/filelist.txt", "r") as file:
         filenames = [line.strip() for line in file]
 
     for file_num, filename_full in enumerate(filenames):
         filename = filename_full.replace(" [processing]", '')
         # Check if the file has already been processed
 
-        # Re-read the config.txt file to get the latest information
-        with open("demcmc_FIP/config.txt", "r") as file:
+        # Re-read the filelist.txt file to get the latest information
+        with open("demcmc_FIP/filelist.txt", "r") as file:
             current_filenames = [line.strip() for line in file]
 
         filename_full = current_filenames[file_num]
         if not filename_full.endswith("[processed]") and not filename_full.endswith("[processing]"):
             # try:
-            # Add "[processing]" to the end of the filename in filenames.txt
+            # Add "[processing]" to the end of the filename in filelist.txt
             processing_filename = filename + " [processing]"
             update_filenames_txt(filename_full, processing_filename)
             print(f"Processing: {filename}")
@@ -260,7 +266,7 @@ if __name__ == "__main__":
             }
             calc_composition(filename, np_file, line_databases, args.cores)
 
-            # Change "[processing]" to "[processed]" in filenames.txt after processing is finished
+            # Change "[processing]" to "[processed]" in filelist.txt after processing is finished
             processed_filename = filename + " [processed]"
             update_filenames_txt(processing_filename, processed_filename)
 
