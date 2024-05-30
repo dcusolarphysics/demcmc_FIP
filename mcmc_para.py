@@ -219,11 +219,11 @@ if __name__ == "__main__":
     # Determine the operating system type (Linux or macOS)
     # Set the default number of cores based on the operating system
     if platform.system() == "Linux":
-        default_cores = os.cpu_count()  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+        default_cores = len(os.sched_getaffinity(0))  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin":
-        default_cores = os.cpu_count()
+        default_cores = len(os.sched_getaffinity(0))
     else:
-        default_cores = os.cpu_count()
+        default_cores = len(os.sched_getaffinity(0))
 
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
