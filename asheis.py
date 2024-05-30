@@ -69,7 +69,8 @@ class asheis:
         self.ncpu = ncpu
         self.rebin = rebin
         if platform.system() == "Linux":
-            self.dens_dir = '/home/staff/daithil/work/python_output/FIP/density'
+#            self.dens_dir = '/home/staff/daithil/work/python_output/FIP/density'
+            self.dens_dir = '/disk/solar2/dml/python/FIP/density'
         elif platform.system() == "Darwin":
             self.dens_dir = '/Users/dml/python_output/FIP/density'
 
