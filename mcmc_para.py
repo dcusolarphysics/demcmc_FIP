@@ -1,6 +1,8 @@
 import warnings
 warnings.filterwarnings('ignore')
 
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from multiprocessing import Pool
 from functools import partial
 from time import sleep
