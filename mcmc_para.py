@@ -10,7 +10,7 @@ import astropy.units as u
 from demcmc_FIP.ashmcmc import ashmcmc, interp_emis_temp
 import argparse
 import platform
-from demcmc import (
+from demcmc_FIP.demcmc import (
     EmissionLine,
     TempBins,
     load_cont_funcs,
@@ -18,7 +18,7 @@ from demcmc import (
     predict_dem_emcee,
     ContFuncDiscrete,
 )
-from demcmc.units import u_temp, u_dem
+from demcmc_FIP.demcmc.units import u_temp, u_dem
 from demcmc_FIP.mcmc.mcmc_utils import calc_chi2, mcmc_process
 
 
@@ -82,7 +82,14 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
 
 def download_data(filename: str) -> None:
     from eispac.download import download_hdf5_data
-    download_hdf5_data(filename.split('/')[-1], local_top='/home/staff/daithil/work/Data/EIS', overwrite=False)
+    if platform.system() == 'Linux':
+#        local_top=f'/home/staff/daithil/work/Data/EIS'
+        local_top=f'/disk/solar14/dml/Data/EIS'
+
+    if platform.system() == 'Darwin':
+        local_top=f'/Users/dml/Data/EIS'
+
+    download_hdf5_data(filename.split('/')[-1], local_top=local_top, overwrite=False)
 
 def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     from glob import glob
@@ -212,11 +219,11 @@ if __name__ == "__main__":
     # Determine the operating system type (Linux or macOS)
     # Set the default number of cores based on the operating system
     if platform.system() == "Linux":
-        default_cores = len(os.sched_getaffinity(0))  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
+        default_cores = os.cpu_count  # above 64 seems to break the MSSL machine - probably due to no. cores = 64?
     elif platform.system() == "Darwin":
-        default_cores = len(os.sched_getaffinity(0))
+        default_cores = 3
     else:
-        default_cores = len(os.sched_getaffinity(0))
+        default_cores = os.cpu_count
 
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Process data using multiprocessing.')
