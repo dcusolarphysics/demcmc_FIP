@@ -8,7 +8,8 @@ def find_matching_file(log_density, abund_file = 'emissivities_sun_photospheric_
     import platform
 
     if platform.system() == 'Linux':
-        directory=f'/home/staff/daithil/work/python_output/FIP/{abund_file}/'
+#        directory=f'/home/staff/daithil/work/python_output/FIP/{abund_file}/'
+        directory=f'/disk/solar2/dml/python/FIP/{abund_file}/'
 
     if platform.system() == 'Darwin':
         directory=f'/Users/dml/python_output/FIP/{abund_file}/'
