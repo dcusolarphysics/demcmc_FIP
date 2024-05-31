@@ -88,7 +88,7 @@ def download_data(filename: str) -> None:
     config_obj = configparser.ConfigParser()
     config_obj.read("demcmc_FIP/configfile.ini")
     directories = config_obj["directories"]
-    local_top = directories['local_top']
+    data_dir = directories['data_dir']
 
 #    if platform.system() == 'Linux':
 ##        local_top=f'/home/staff/daithil/work/Data/EIS'
@@ -97,7 +97,7 @@ def download_data(filename: str) -> None:
 #    if platform.system() == 'Darwin':
 #        local_top=f'/Users/dml/Data/EIS'
 
-    download_hdf5_data(filename.split('/')[-1], local_top=local_top, overwrite=False)
+    download_hdf5_data(filename.split('/')[-1], local_top=data_dir, overwrite=False)
 
 def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     from glob import glob

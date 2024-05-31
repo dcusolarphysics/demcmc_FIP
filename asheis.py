@@ -73,7 +73,7 @@ class asheis:
         config_obj = configparser.ConfigParser()
         config_obj.read("demcmc_FIP/configfile.ini")
         directories = config_obj["directories"]
-        self.dens_dir = directories['dens_dir']
+        self.dens_dir = directories['main_dir']+'density'
 
 #        if platform.system() == "Linux":
 ##            self.dens_dir = '/home/staff/daithil/work/python_output/FIP/density'
