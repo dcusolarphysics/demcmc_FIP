@@ -12,7 +12,7 @@ def find_matching_file(log_density, abund_file = 'emissivities_sun_photospheric_
     config_obj.read("demcmc_FIP/configfile.ini")
     directories = config_obj["directories"]
     main_dir = directories['main_dir']
-    directory = main_dir+'{abund_file}/'
+    directory = main_dir+abund_file+'/'
 
 #    if platform.system() == 'Linux':
 ##        directory=f'/home/staff/daithil/work/python_output/FIP/{abund_file}/'
