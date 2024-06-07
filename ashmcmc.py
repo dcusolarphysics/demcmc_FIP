@@ -93,7 +93,7 @@ class ashmcmc:
 
         return Lines, Intensities, Int_error
 
-    def read_density(self,calib=True, **kwargs):
+    def read_density(self,calib=False, **kwargs):
         # Read density from asheis object
         # Returns an array of log densities
         ldens = self.ash.get_density(outdir=self.outdir, mcmc=True, calib=calib, **kwargs)
