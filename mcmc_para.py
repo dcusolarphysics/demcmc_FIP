@@ -56,7 +56,7 @@ def process_pixel(args: tuple[int, np.ndarray, np.ndarray, list[str], np.ndarray
             mcmc_lines = []
 
             for ind, line in enumerate(Lines):
-                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 30):
+                if (line[:2] == 'fe') and (Intensity[ypix, xpix, ind] > 5):
                     mcmc_emis = ContFuncDiscrete(logt_interp*u.K, interp_emis_temp(emis_sorted[ind, :]) * u.cm ** 5 / u.K,
                                                 name=line)
                     mcmc_intensity = Intensity[ypix, xpix, ind]
