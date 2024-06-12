@@ -5,7 +5,7 @@ import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from multiprocessing import Pool
 from functools import partial
-from time import sleep
+from time import sleep, time
 from tqdm import tqdm
 import numpy as np
 import astropy.units as u
@@ -89,13 +89,6 @@ def download_data(filename: str) -> None:
     config_obj.read("demcmc_FIP/configfile.ini")
     directories = config_obj["directories"]
     data_dir = directories['data_dir']
-
-#    if platform.system() == 'Linux':
-##        local_top=f'/home/staff/daithil/work/Data/EIS'
-#        local_top=f'/disk/solar14/dml/Data/EIS'
-#
-#    if platform.system() == 'Darwin':
-#        local_top=f'/Users/dml/Data/EIS'
 
     download_hdf5_data(filename.split('/')[-1], local_top=data_dir, overwrite=False)
 
@@ -202,6 +195,9 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         for ypix, xpix, fip_ratio in results:
             composition[ypix, xpix] = fip_ratio
 
+        # Filter out the pixels with a bad chi2
+        composition[np.where(dem_data['chi2_combined']>dem_data['lines_used'])] = -100
+
         np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz',
                  composition=composition, chi2=dem_data['chi2_combined'], no_lines=dem_data['lines_used'])
 
@@ -224,6 +220,8 @@ def update_filenames_txt(old_filename, new_filename):
                 file.write(line)
 
 if __name__ == "__main__":
+
+    start_time = time()
     # Determine the operating system type (Linux or macOS)
     # Set the default number of cores based on the operating system
     if platform.system() == "Linux":
@@ -269,6 +267,9 @@ if __name__ == "__main__":
             # Change "[processing]" to "[processed]" in filelist.txt after processing is finished
             processed_filename = filename + " [processed]"
             update_filenames_txt(processing_filename, processed_filename)
+
+    elapsed_time = (time() - start_time)/3600.
+    print(f"Execution time: {elapsed_time} hours")
 
             # except Exception as e:
             #     print(f"Failed: {e}")
