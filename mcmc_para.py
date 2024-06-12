@@ -180,7 +180,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         # Read the intensity maps for the composition lines
         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
             print('getting intensity \n')
-            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=False)
+            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=True)
             intensities[:, :, num] = map.data
 
         # Create argument list for parallel processing

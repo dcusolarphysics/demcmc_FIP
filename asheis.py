@@ -10,7 +10,7 @@ from datetime import datetime
 # from alpha_code import alpha, alpha_map
 import platform
 from astropy.visualization import ImageNormalize, quantity_support
-#from demcmc_FIP.eis_calibration.eis_calib_2014 import calib_2014
+from demcmc_FIP.eis_calibration.eis_calib_2014 import calib_2014
 #from demcmc_FIP.eis_calibration.eis_calib_2023 import calib_2023
 import configparser
 
@@ -124,9 +124,6 @@ class asheis:
         date = amap.date.strftime("%Y_%m_%d__%H_%M_%S")
         Path(f'{outdir}/images/fits/').mkdir(parents=True, exist_ok=True)
         Path(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/').mkdir(parents=True, exist_ok=True)
-        # print(date)
-        # print(amap.measurement.lower().split())
-        # print(f'{date}')
         amap.save(f"{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{'_'.join(amap.measurement.lower().split())}.fits", overwrite=True)
         return date
     
@@ -135,14 +132,12 @@ class asheis:
         amap.plot(**kwargs)
         if colorbar==True: plt.colorbar() 
         load_axes_labels()
-        # plt.savefig(f'{date}/eis_{m.measurement.lower().replace(" ","_").replace(".","_")}.png')
         if savefig==True: plt.savefig(f'{outdir}/images/{amap.measurement.lower().split()[-1]}/{line}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
-        # plt.savefig(f'images/{amap.measurement.lower().split()[-1]}/eis_{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
     def plot_fip_map(self, date, amap, outdir, colorbar=True, savefig=True):
         load_plotting_routine()
 
-        norm = colors.Normalize(vmin=0, vmax=4)
+        norm = colors.Normalize(vmin=0, vmax=3)
         amap.plot_settings['norm'] = norm
         amap.plot_settings['cmap'] = 'RdYlBu'
         amap.plot()
@@ -151,7 +146,7 @@ class asheis:
         load_axes_labels()
         if savefig==True: plt.savefig(f'{outdir}/images/{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
-    def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=False):
+    def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=True):
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
         if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
@@ -214,7 +209,7 @@ class asheis:
 
 
 
-    def get_composition(self, linepair, outdir='', vmin=0, vmax=4, **kwargs):
+    def get_composition(self, linepair, outdir='', vmin=0, vmax=3, **kwargs):
         '''
         This quick look composition code is incomplete and probably doesn't work. Especially be careful of shift2wave code.
         '''
