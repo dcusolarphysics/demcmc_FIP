@@ -23,6 +23,7 @@ from demcmc_FIP.demcmc import (
 from demcmc_FIP.demcmc.units import u_temp, u_dem
 from demcmc_FIP.mcmc.mcmc_utils import calc_chi2, mcmc_process
 import configparser
+import asdf
 
 def check_dem_exists(filename: str) -> bool:
     # Check if the DEM file exists
@@ -198,9 +199,17 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         # Filter out the pixels with a bad chi2
         composition[np.where(dem_data['chi2_combined']>dem_data['lines_used'])] = -100
 
-        np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz',
-                 composition=composition, chi2=dem_data['chi2_combined'], no_lines=dem_data['lines_used'])
+#        np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.npz',
+#                 composition=composition, chi2=dem_data['chi2_combined'], no_lines=dem_data['lines_used'])
 
+        # Save the run outputs as an asdf file
+        tree = {'dem_combined':dem_data['dem_combined'], 'chi2_combined':dem_data['chi2_combined'], 
+                'lines_used':dem_data['lines_used'], 'logt':dem_data['logt'], composition:composition}
+        with asdf.AsdfFile(tree) as asdf_file:  
+            asdf_file.write_to(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.asdf', 
+                               all_array_compression='zlib')
+
+        # Save the FIP map as a FITS file and plot it.
         map_fip = Map(composition, map.meta)
         map_fip = correct_metadata(map_fip, comp_ratio)
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits', overwrite=True)
@@ -251,7 +260,6 @@ if __name__ == "__main__":
 
         filename_full = current_filenames[file_num]
         if not filename_full.endswith("[processed]") and not filename_full.endswith("[processing]"):
-            # try:
             # Add "[processing]" to the end of the filename in filelist.txt
             processing_filename = filename + " [processing]"
             update_filenames_txt(filename_full, processing_filename)
@@ -270,6 +278,3 @@ if __name__ == "__main__":
 
     elapsed_time = (time() - start_time)/3600.
     print(f"Execution time: {elapsed_time} hours")
-
-            # except Exception as e:
-            #     print(f"Failed: {e}")
