@@ -208,7 +208,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         lines_used = dem_data['lines_used']
         logt = dem_data['logt']
         tree = {'dem_combined':dem_combined, 'chi2_combined':chi2_combined, 
-                'lines_used':lines_used, 'logt':logt, composition:composition}
+                'lines_used':lines_used, 'logt':logt, 'composition':composition}
         with asdf.AsdfFile(tree) as asdf_file:  
             asdf_file.write_to(f'{a.outdir}/{a.outdir.split("/")[-1]}_composition_{comp_ratio}.asdf', 
                                all_array_compression='zlib')
