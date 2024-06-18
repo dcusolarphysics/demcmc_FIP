@@ -197,6 +197,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         args_list = [(ypix, xpix, ldens, dem_median, intensities, line_databases, comp_ratio, a)
                      for ypix, xpix in np.ndindex(ldens.shape)]
 
+        print(args_list)
         # Create a pool of worker processes
         with Pool(processes=num_processes) as pool:
             results = pool.map(calc_composition_parallel, args_list)
