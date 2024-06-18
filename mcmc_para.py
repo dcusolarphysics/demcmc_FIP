@@ -119,31 +119,34 @@ def process_data(filename: str, num_processes: int) -> None:
     download_data(filename)
     a = ashmcmc(filename)
 
-    exists = os.path.exists(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf')
-    if exists:
-        print(f'File already exists.. Skipping DEMCMC calculations and loading prexisting file.')
-    else:
+#    exists = os.path.exists(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf')
+#    if exists:
+#        print(f'File already exists.. Skipping DEMCMC calculations and loading prexisting file.')
+#    else:
     # Retrieve necessary data from ashmcmc object
-        Lines, Intensity, Int_error = a.fit_data(plot=True)
-        ldens = a.read_density()
+    Lines, Intensity, Int_error = a.fit_data(plot=True)
+    ldens = a.read_density()
 
     # Generate a list of arguments for process_pixel function
-        args_list = [(xpix, Intensity, Int_error, Lines, ldens, a) for xpix in range(Intensity.shape[1])]
+    args_list = [(xpix, Intensity, Int_error, Lines, ldens, a) for xpix in range(Intensity.shape[1])]
 
     # Create a Pool of processes for parallel execution
-        with Pool(processes=num_processes) as pool:
-            results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
+    with Pool(processes=num_processes) as pool:
+        results = list(tqdm(pool.imap(process_pixel, args_list), total=len(args_list), desc="Processing Pixels"))
 
     # Combine the DEM files into a single array
-        print('------------------------------Combining DEM files------------------------------')
-        dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
+    print('------------------------------Combining DEM files------------------------------')
+    dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     
-        tree = {'dem_combined':dem_combined, 'chi2_combined':chi2_combined, 
-                'lines_used':lines_used, 'logt':logt}
-        with asdf.AsdfFile(tree) as asdf_file:  
-            asdf_file.write_to(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf', all_array_compression='zlib')
-    
-    return f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf'
+#    tree = {'dem_combined':dem_combined, 'chi2_combined':chi2_combined, 
+#            'lines_used':lines_used, 'logt':logt}
+#    with asdf.AsdfFile(tree) as asdf_file:  
+#        asdf_file.write_to(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf', all_array_compression='zlib')
+#    return f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf'
+
+    np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, 
+             lines_used=lines_used, logt=logt)
+    return f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.npz'
 
 def pred_intensity_compact(emis:np.array, logt:np.array, linename:str, dem:np.array) -> float:
     mcmc_emis = ContFuncDiscrete(logt*u.K, interp_emis_temp(emis) * u.cm ** 5 / u.K,
@@ -178,9 +181,9 @@ def calc_composition(filename, np_file, line_databases, num_processes):
     from multiprocessing import Pool
 
     a = ashmcmc(filename)
-#    dem_data = np.load(np_file)
+    dem_data = np.load(np_file)
     ldens = a.read_density()
-    dem_data = asdf.open(np_file)
+#    dem_data = asdf.open(np_file)
     dem_median = dem_data['dem_combined']
 
     for comp_ratio in line_databases:
