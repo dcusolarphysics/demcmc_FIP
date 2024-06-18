@@ -8,7 +8,6 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 from datetime import datetime
 # from alpha_code import alpha, alpha_map
-import platform
 from astropy.visualization import ImageNormalize, quantity_support
 from demcmc_FIP.eis_calibration.eis_calib_2014 import calib_2014
 #from demcmc_FIP.eis_calibration.eis_calib_2023 import calib_2023
@@ -75,13 +74,6 @@ class asheis:
         directories = config_obj["directories"]
         main_dir = directories['main_dir']
         self.dens_dir = main_dir+'density'
-
-#        if platform.system() == "Linux":
-##            self.dens_dir = '/home/staff/daithil/work/python_output/FIP/density'
-#            self.dens_dir = '/disk/solar2/dml/python/FIP/density'
-#        elif platform.system() == "Darwin":
-#            self.dens_dir = '/Users/dml/python_output/FIP/density'
-
 
     def check_window(self, line):
         print(f'Checking {line}')

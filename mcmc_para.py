@@ -98,7 +98,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     from re import search
 
     dem_files = sorted(glob(f'{dir}/dem_columns/dem*.npz'))
-    print(dem_files)
+#    print(dem_files)
     ref = np.load(dem_files[0])['dem_results'].shape
     logt = np.load(dem_files[0])['logt']
     dem_combined = np.zeros((ydim,xdim,ref[1]))
@@ -106,9 +106,9 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
     lines_used = np.zeros((ydim,xdim))
 
     for dem_file in dem_files:
-        print(dem_file)
+#        print(dem_file)
         xpix_loc = search(r'dem_(\d+)\.npz$', dem_file).group(1)
-        print(xpix_loc)
+#        print(xpix_loc)
         dem_combined[:,int(xpix_loc), :] = np.load(dem_file)['dem_results'] 
         chi2_combined[:,int(xpix_loc)] = np.load(dem_file)['chi2'] 
         lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file, allow_pickle=True)['lines_used']])
@@ -121,7 +121,7 @@ def process_data(filename: str, num_processes: int) -> None:
 
     exists = os.path.exists(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf')
     if exists:
-        print('File already exists.. Skipping DEMCMC calculations and loading prexisting file.')
+        print(f'File already exists.. Skipping DEMCMC calculations and loading prexisting file.')
     else:
     # Retrieve necessary data from ashmcmc object
         Lines, Intensity, Int_error = a.fit_data(plot=True)
@@ -190,7 +190,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         # Read the intensity maps for the composition lines
         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
             print('getting intensity \n')
-            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=True)
+            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=False)
             intensities[:, :, num] = map.data
 
         # Create argument list for parallel processing
