@@ -139,12 +139,6 @@ def process_data(filename: str, num_processes: int) -> None:
         print('------------------------------Combining DEM files------------------------------')
         dem_combined, chi2_combined, lines_used, logt = combine_dem_files(Intensity.shape[1], Intensity.shape[0], a.outdir)
     
-#    tree = {'dem_combined':dem_combined, 'chi2_combined':chi2_combined, 
-#            'lines_used':lines_used, 'logt':logt}
-#    with asdf.AsdfFile(tree) as asdf_file:  
-#        asdf_file.write_to(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf', all_array_compression='zlib')
-#    return f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.asdf'
-
         np.savez(f'{a.outdir}/{a.outdir.split("/")[-1]}_dem_combined.npz', dem_combined=dem_combined, chi2_combined=chi2_combined, 
                  lines_used=lines_used, logt=logt)
 
