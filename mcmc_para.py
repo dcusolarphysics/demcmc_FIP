@@ -115,7 +115,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
         lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file, allow_pickle=True)['lines_used']])
     return dem_combined, chi2_combined, lines_used, logt
 
-def process_data(filename: str, num_processes: int) -> None:
+def process_data(filename: str, num_processes: int, calib=calib) -> None:
     # Create an ashmcmc object with the specified filename
     download_data(filename)
     a = ashmcmc(filename)
@@ -125,7 +125,7 @@ def process_data(filename: str, num_processes: int) -> None:
         print(f'File already exists.. Skipping DEMCMC calculations and loading prexisting file.')
     else:
     # Retrieve necessary data from ashmcmc object
-        Lines, Intensity, Int_error = a.fit_data(plot=True)
+        Lines, Intensity, Int_error = a.fit_data(plot=True, calib=calib)
         ldens = a.read_density()
 
     # Generate a list of arguments for process_pixel function
@@ -172,14 +172,13 @@ def calc_composition_parallel(args):
     fip_ratio = int_hf / intensities[ypix, xpix, 1]
     return ypix, xpix, fip_ratio
 
-def calc_composition(filename, np_file, line_databases, num_processes):
+def calc_composition(filename, np_file, line_databases, num_processes, calib=calib):
     from sunpy.map import Map
     from multiprocessing import Pool
 
     a = ashmcmc(filename)
     dem_data = np.load(np_file)
     ldens = a.read_density()
-#    dem_data = asdf.open(np_file)
     dem_median = dem_data['dem_combined']
 
     for comp_ratio in line_databases:
@@ -189,7 +188,7 @@ def calc_composition(filename, np_file, line_databases, num_processes):
         # Read the intensity maps for the composition lines
         for num, fip_line in enumerate(line_databases[comp_ratio][:2]):
             print('getting intensity \n')
-            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=False)
+            map = a.ash.get_intensity(fip_line, outdir=a.outdir, plot=True, calib=calib)
             intensities[:, :, num] = map.data
 
         # Create argument list for parallel processing
@@ -262,6 +261,9 @@ if __name__ == "__main__":
                         help='Number of cores to use (default: {})'.format(default_cores))
     args = parser.parse_args()
 
+    # Set whether to use the Warren 2014 calibration (calib=True) or preflight calibration (calib=False)
+    calib=True
+
     # Read filenames from a text file
     with open("demcmc_FIP/filelist.txt", "r") as file:
         filenames = [line.strip() for line in file]
@@ -280,13 +282,13 @@ if __name__ == "__main__":
             processing_filename = filename + " [processing]"
             update_filenames_txt(filename_full, processing_filename)
             print(f"Processing: {filename}")
-            np_file = process_data(filename, args.cores)
+            np_file = process_data(filename, args.cores, calib=calib)
             print(f"Processed: {filename}")
             line_databases = {
                 "sis": ['si_10_258.37', 's_10_264.23', 'SiX_SX'],
 #                "CaAr": ['ca_14_193.87', 'ar_14_194.40', 'CaXIV_ArXIV'],
             }
-            calc_composition(filename, np_file, line_databases, args.cores)
+            calc_composition(filename, np_file, line_databases, args.cores, calib=calib)
 
             # Change "[processing]" to "[processed]" in filelist.txt after processing is finished
             processed_filename = filename + " [processed]"

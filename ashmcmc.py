@@ -62,7 +62,7 @@ class ashmcmc:
     #             intensity = self.ash.get_intensity(i, outdir=self.outdir, mcmc=True, plot=False)
     #             return i, intensity
 
-    def fit_data(self, **kwargs):
+    def fit_data(self, calib=calib, **kwargs):
         from tqdm import tqdm
         from eispac import read_cube
         # Fit data in parallel
@@ -81,7 +81,7 @@ class ashmcmc:
         print(f'------------------------------Found {dem_num} usable lines------------------------------')
         print(f'Found {dem_num} usable lines for DEM')
         for ind, line in tqdm(enumerate(Lines)):
-            Intensities[:, :, ind], Int_error[:, :, ind] = self.ash.get_intensity(line, outdir=self.outdir, mcmc=True, **kwargs)
+            Intensities[:, :, ind], Int_error[:, :, ind] = self.ash.get_intensity(line, outdir=self.outdir, mcmc=True, calib=calib, **kwargs)
 
         return Lines, Intensities, Int_error
 
