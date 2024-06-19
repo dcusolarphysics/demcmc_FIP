@@ -201,7 +201,7 @@ class asheis:
 
 
 
-    def get_composition(self, linepair, outdir='', vmin=0, vmax=3, **kwargs, calib=calib):
+    def get_composition(self, linepair, outdir='', vmin=0, vmax=3, calib=calib, **kwargs):
         '''
         This quick look composition code is incomplete and probably doesn't work. Especially be careful of shift2wave code.
         '''
