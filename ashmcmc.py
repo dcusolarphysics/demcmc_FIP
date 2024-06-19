@@ -62,7 +62,7 @@ class ashmcmc:
     #             intensity = self.ash.get_intensity(i, outdir=self.outdir, mcmc=True, plot=False)
     #             return i, intensity
 
-    def fit_data(self, calib=calib, **kwargs):
+    def fit_data(self, calib=False, **kwargs):
         from tqdm import tqdm
         from eispac import read_cube
         # Fit data in parallel

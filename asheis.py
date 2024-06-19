@@ -138,7 +138,7 @@ class asheis:
         load_axes_labels()
         if savefig==True: plt.savefig(f'{outdir}/images/{date}_{amap.measurement.lower().replace(" ","_").replace(".","_")}.png')
 
-    def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=calib):
+    def get_intensity(self, line, outdir='', refit=False, plot=True, mcmc=False, calib=False):
         fit_res = self.fit_data(line,'int',refit, outdir) # Get fitdata
         m = fit_res.get_map(self.dict[f'{line}'][1],measurement='intensity') # From fitdata get map
         if calib: # Calibrate data using NRL calibration (Warren et al. 2014)
@@ -201,7 +201,7 @@ class asheis:
 
 
 
-    def get_composition(self, linepair, outdir='', vmin=0, vmax=3, calib=calib, **kwargs):
+    def get_composition(self, linepair, outdir='', vmin=0, vmax=3, calib=False, **kwargs):
         '''
         This quick look composition code is incomplete and probably doesn't work. Especially be careful of shift2wave code.
         '''

@@ -115,7 +115,7 @@ def combine_dem_files(xdim:int, ydim:int, dir: str) -> np.array:
         lines_used[:,int(xpix_loc)] = np.array([len(line) for line in np.load(dem_file, allow_pickle=True)['lines_used']])
     return dem_combined, chi2_combined, lines_used, logt
 
-def process_data(filename: str, num_processes: int, calib=calib) -> None:
+def process_data(filename: str, num_processes: int, calib=False) -> None:
     # Create an ashmcmc object with the specified filename
     download_data(filename)
     a = ashmcmc(filename)
@@ -172,7 +172,7 @@ def calc_composition_parallel(args):
     fip_ratio = int_hf / intensities[ypix, xpix, 1]
     return ypix, xpix, fip_ratio
 
-def calc_composition(filename, np_file, line_databases, num_processes, calib=calib):
+def calc_composition(filename, np_file, line_databases, num_processes, calib=False):
     from sunpy.map import Map
     from multiprocessing import Pool
 
