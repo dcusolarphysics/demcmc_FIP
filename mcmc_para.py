@@ -226,9 +226,6 @@ def calc_composition(filename, np_file, line_databases, num_processes, calib=Fal
         map_fip.save(f'{a.outdir}/{a.outdir.split("/")[-1]}_{comp_ratio}.fits', overwrite=True)
         a.ash.plot_fip_map(a.outdir.split("/")[-1], map_fip, a.outdir)
 
-        # Remove the directory with DEM columns as no longer needed.
-        shutil.rmtree(f'{a.outdir}/dem_columns/')
-
 
 import os
 
