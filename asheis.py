@@ -12,6 +12,7 @@ from astropy.visualization import ImageNormalize, quantity_support
 from demcmc_FIP.eis_calibration.eis_calib_2014 import calib_2014
 #from demcmc_FIP.eis_calibration.eis_calib_2023 import calib_2023
 import configparser
+from astropy import units as u
 
 def load_plotting_routine():
     fig = plt.figure()
@@ -89,9 +90,9 @@ class asheis:
         if template_name != 'fe_13_203_826.2c.template.h5':
             template = eispac.read_template(eispac.data.get_fit_template_filepath(template_name))
         else:
-            template = eispac.read_template('demcmc_FIP/eis_density/fe_13_203_830.3c.template.h5')
+            template = eispac.read_template(Path(__file__).parent / 'eis_density/fe_13_203_830.3c.template.h5')
             template_name = 'fe_13_203_830.3c.template.h5'
-
+ 
         path = Path(f'{self.filename}'.replace("data.h5",template_name).replace(".template",f"-{self.dict[f'{line}'][1]}.fit"))
         # if self rebin != False:
         print(path)
@@ -102,14 +103,14 @@ class asheis:
                 cube = cube.smooth_cube(self.rebin)
             fit_res = eispac.fit_spectra(cube, template, ncpu=self.ncpu)
             fit_res.fit[f'{product}'] = fit_res.shift2wave(fit_res.fit[f'{product}'],wave=195.119)
-            disp = ccd_offset(195.119) - ccd_offset(fit_res.fit['wave_range'].mean())
+            disp = (ccd_offset(195.119*u.AA) - ccd_offset(fit_res.fit['wave_range'].mean()*u.AA)).to_value('pixel')
             fit_res.meta['mod_index']['crval2'] = float(fit_res.meta['mod_index']['crval2'] - disp)
             save_filepaths = eispac.save_fit(fit_res)
         else:
             fit_res=eispac.read_fit(path)
-
+ 
         return fit_res
-    
+   
     
     def directory_setup(self, amap, line, outdir):
         # Set up directory and save fit
