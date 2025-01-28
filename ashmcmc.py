@@ -11,7 +11,8 @@ def find_matching_file(log_density, abund_file = 'emissivities_sun_photospheric_
     config_obj.read("demcmc_FIP/configfile.ini")
     directories = config_obj["directories"]
     main_dir = directories['main_dir']
-    directory = main_dir+abund_file+'/'
+    directory = os.path.join(main_dir, abund_file, '')
+
 
     # Convert log_density to float
     target_log_density = float(log_density)
